@@ -1,0 +1,221 @@
+:root {
+    --orange: #e97522;
+    --orange-dark: #b85c00;
+    --green: #245c3a;
+    --ink: #1f2420;
+    --line: rgba(31, 36, 32, 0.12);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #fff8f0;
+    color: var(--ink);
+}
+
+header {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: rgba(255, 255, 255, 0.94);
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(12px);
+}
+
+nav {
+    width: min(1180px, calc(100% - 32px));
+    min-height: 74px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    transition: min-height 0.25s ease, box-shadow 0.25s ease;
+}
+
+nav.anim-nav {
+    min-height: 64px;
+    box-shadow: 0 10px 26px rgba(31, 36, 32, 0.08);
+}
+
+.logo {
+    color: var(--green);
+    font-size: clamp(1.2rem, 2.2vw, 1.75rem);
+    font-weight: 800;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.list {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+nav a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 13px;
+    border-radius: 6px;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 0.98rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+nav a:hover,
+nav a.active {
+    color: var(--orange-dark);
+    background: rgba(233, 117, 34, 0.1);
+    border-color: rgba(233, 117, 34, 0.24);
+}
+
+nav a.nav-cta {
+    background: var(--orange);
+    color: #fff;
+    border-color: var(--orange);
+}
+
+nav a.nav-cta:hover {
+    background: var(--orange-dark);
+    border-color: var(--orange-dark);
+    color: #fff;
+}
+
+@media (max-width: 900px) {
+    nav {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 14px 0;
+    }
+
+    .list {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    nav a {
+        min-height: 38px;
+        padding: 0 10px;
+        font-size: 0.92rem;
+    }
+}
+
+
+
+
+
+/* Section contact */
+.contact-section {
+    max-width: 450px;
+    margin: 50px auto 0 auto;
+    background: #fff8f0;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    padding: 2.5rem 2rem 2rem 2rem;
+    text-align: center;
+    animation: fadeIn 1s;
+}
+
+.contact-section h1 {
+    color: #b85c00;
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    letter-spacing: 1px;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.contact-form input[type="text"],
+.contact-form input[type="email"],
+.contact-form textarea {
+    padding: 0.9rem 1rem;
+    border: 1.5px solid #e97522;
+    border-radius: 10px;
+    font-size: 1rem;
+    background: #fff;
+    transition: border 0.2s, box-shadow 0.2s;
+    outline: none;
+    resize: none;
+}
+
+.contact-form input[type="text"]:focus,
+.contact-form input[type="email"]:focus,
+.contact-form textarea:focus {
+    border: 2px solid #b85c00;
+    box-shadow: 0 0 8px rgba(233,117,34,0.12);
+}
+
+.contact-form input[type="submit"] {
+    background: linear-gradient(90deg, #e97522 60%, #b85c00 100%);
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+    padding: 0.9rem 0;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(233,117,34,0.08);
+    transition: background 0.2s, transform 0.2s;
+    margin-top: 0.5rem;
+}
+
+.contact-form input[type="submit"]:hover {
+    background: linear-gradient(90deg, #b85c00 60%, #e97522 100%);
+    transform: translateY(-2px) scale(1.03);
+}
+
+#formMessage {
+    margin-top: 1.2rem;
+    font-size: 1.08rem;
+    font-weight: 500;
+    min-height: 24px;
+    transition: color 0.3s;
+}
+
+/* Animation d'apparition */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(30px);}
+    to { opacity: 1; transform: translateY(0);}
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .contact-section {
+        padding: 1.2rem 0.5rem;
+        max-width: 98vw;
+    }
+    .contact-section h1 {
+        font-size: 1.3rem;
+    }
+    .contact-form input, .contact-form textarea {
+        font-size: 0.98rem;
+    }
+}
+
+
+
+/* Footer */
+footer {
+    background: #333;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}

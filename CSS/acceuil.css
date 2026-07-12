@@ -1,0 +1,471 @@
+/*----------------------------------------BODY---------------------------------------------------------*/
+
+* {
+    box-sizing: border-box;
+}
+
+body{
+    font-family: Roboto, arial , Arial, Helvetica, sans-serif;
+    position: relative;
+    margin: 0;
+    background: #fff8f0;
+    color: #222;
+}
+
+/*--------------------------------------NAV-BAR-----------------------------------------------------*/
+
+header {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: #fff;
+}
+
+nav {
+    width: 100%;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    z-index: 100;
+    transition: background 0.3s, box-shadow 0.3s;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.logo{
+    font-size: 30px;
+    padding-left: 20px;
+    font-weight: bolder;
+}
+
+nav ul{
+    list-style-type: none;
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+nav li{
+    margin: 0 20px;
+}
+
+nav a{
+    text-decoration: none;
+    color: black;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 10px 10px 10px 10px;
+}
+
+nav.anim-nav{
+    background: rgb(255, 255, 255);
+    border-bottom: 1px solid white;
+    color: rgb(0, 0, 0);
+
+}
+
+.liens{
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration: none;
+    margin-right: 20px;
+    padding: 15px;
+    border-radius: 15px;
+    color: rgb(0, 0, 0);
+    border: 1px solid (0,0,0,.2) black;
+    box-shadow: 0 2px 0 rgb(0, 0, 0);
+    background-color: blanchedalmond ;
+    cursor: pointer;
+}
+
+nav ul li a:hover{
+    color: rgb(233, 117, 34);
+    border-radius: 5px;
+    border: 2px solid black; 
+
+}
+
+
+nav ul li a.active{
+    color: rgb(233, 117, 34);
+    border-radius: 5px;
+    border: 2px solid black; 
+}
+
+.liens:hover{
+    cursor: pointer;
+
+}
+
+.liens:active{
+    box-shadow: none;
+}
+
+@media screen and (max-width:950px ) {
+    nav{
+        justify-content: center;
+        flex-direction: column;
+        height: auto;
+        position: absolute;
+        top: -5px;
+        border-bottom: 1px solid black;
+    }
+    .logo{
+        padding-left: 0;
+        width: 100%;
+        background: white;
+        text-align: center;
+        height: 70px;
+    }
+    nav ul{
+        width: 100%;
+        background: white;
+        flex-direction: column;
+    }
+    nav ul li{
+        height: 70px;
+        line-height: 70px;
+    }
+    .liens{
+        display: block;
+        justify-content: end;
+    }
+    
+}
+
+/*--------------------------------------PARTIE PRINCIPALE-----------------------------------------------------*/
+
+
+/*--------------------------------------PARTIE PRINCIPALE-----------------------------------------------------*/
+
+.pt-principal {
+    min-height: 560px;
+    background: url(../IMG_PAGE/acceuil.jpg) center no-repeat;
+    background-size: cover;
+    text-align: center;
+    color: white;
+    padding: 80px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-contenu {
+    max-width: 880px;
+    animation: fadeIn 1s ease-in-out;
+}
+
+.accroche {
+    display: inline-block;
+    margin: 0 0 18px;
+    padding: 8px 16px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.pt-principal h1 {
+    font-size: clamp(2.4rem, 6vw, 4.8rem);
+    margin: 0;
+    color: #fff;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+    animation: fadeInDown 1s ease-in-out;
+    
+}
+
+.pt-principal h2 {
+    font-size: clamp(1.15rem, 3vw, 1.7rem);
+    margin: 20px auto 0;
+    max-width: 760px;
+    font-style: italic;
+    color: #f0f0f0;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+    animation: fadeInUp 1s ease-in-out;
+}
+
+.hero-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 38px;
+}
+
+.btn-principal,
+.btn-secondaire {
+    display: inline-block;
+    padding: 14px 22px;
+    min-width: 190px;
+    font-size: 1.05rem;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: transform 0.2s, background 0.2s, color 0.2s;
+}
+
+.btn-principal {
+    background: rgb(233, 117, 34);
+    color: white;
+    border: 2px solid rgb(233, 117, 34);
+}
+
+.btn-secondaire {
+    color: white;
+    border: 2px solid white;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.btn-principal:hover,
+.btn-secondaire:hover {
+    transform: translateY(-2px);
+}
+
+.btn-principal:hover {
+    background: #b85c00;
+    border-color: #b85c00;
+}
+
+.btn-secondaire:hover {
+    background: white;
+    color: #222;
+}
+
+
+/* Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+
+/*--------------------------------------PARTIE PRINCIPALE-----------------------------------------------------*/
+
+
+/*--------------------------------------PARTIE PRINCIPALE 2-----------------------------------------------------*/
+
+.pt-principal2 {
+    width: min(100%, 1200px);
+    margin: 40px auto;
+    padding: 30px 20px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+.pt-principal2 > h1,
+.avantages > h1,
+.appel-action h1 {
+    color: #b85c00;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.intro-section {
+    max-width: 720px;
+    text-align: center;
+    color: #555;
+    line-height: 1.6;
+    margin: 0 0 20px;
+}
+
+.generale {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.generale img{
+    height: 335px;
+}
+
+.generale .img {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: #fff8f0;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.generale .img img {
+    width: 100%;
+    max-width: 320px;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.generale .img h1 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.generale .img p {
+    font-size: 1em;
+    color: #555;
+    line-height: 1.5;
+}
+
+.generale .img:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.avantages {
+    padding: 45px 5vw;
+    background: #fff8f0;
+}
+
+.avantages-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+    margin: 28px auto 0;
+}
+
+.avantages article {
+    background: white;
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.avantages span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgb(233, 117, 34);
+    color: white;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.avantages h2 {
+    color: #e97522;
+    font-size: 1.25rem;
+    margin: 0 0 10px;
+}
+
+.avantages p,
+.appel-action p {
+    color: #555;
+    line-height: 1.6;
+}
+
+.appel-action {
+    margin: 10px auto 45px;
+    padding: 42px 20px;
+    max-width: 1000px;
+    text-align: center;
+    background: #333;
+    color: white;
+    border-radius: 10px;
+}
+
+.appel-action p {
+    color: #f0f0f0;
+    margin-bottom: 24px;
+}
+
+
+
+/* Responsive Design */
+@media screen and (min-width: 768px) {
+    .generale {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .generale .img {
+        flex: 1;
+        margin: 0 10px;
+    }
+}
+
+@media screen and (max-width: 950px) {
+    .pt-principal {
+        padding-top: 270px;
+        min-height: 720px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .avantages-list {
+        grid-template-columns: 1fr;
+    }
+
+    .appel-action {
+        margin-left: 16px;
+        margin-right: 16px;
+    }
+}
+
+/* Animation pour les blocs */
+.generale .img.hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.generale .img.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+
+/* Footer */
+footer {
+    background: #333;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}

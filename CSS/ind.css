@@ -1,0 +1,509 @@
+:root {
+    --orange: #e97522;
+    --orange-dark: #b85c00;
+    --green: #245c3a;
+    --ink: #1f2420;
+    --muted: #606866;
+    --cream: #fff8f0;
+    --paper: #ffffff;
+    --line: rgba(31, 36, 32, 0.12);
+    --shadow: 0 18px 45px rgba(31, 36, 32, 0.14);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+a {
+    color: inherit;
+}
+
+header {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: rgba(255, 255, 255, 0.94);
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(12px);
+}
+
+nav {
+    width: min(1180px, calc(100% - 32px));
+    min-height: 74px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    transition: min-height 0.25s ease, box-shadow 0.25s ease;
+}
+
+nav.anim-nav {
+    min-height: 64px;
+    box-shadow: 0 10px 26px rgba(31, 36, 32, 0.08);
+}
+
+.logo {
+    color: var(--green);
+    font-size: clamp(1.2rem, 2.2vw, 1.75rem);
+    font-weight: 800;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.list {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+nav a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 13px;
+    border-radius: 6px;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 0.98rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+nav a:hover,
+nav a.active {
+    color: var(--orange-dark);
+    background: rgba(233, 117, 34, 0.1);
+    border-color: rgba(233, 117, 34, 0.24);
+}
+
+nav a.nav-cta {
+    background: var(--orange);
+    color: #fff;
+    border-color: var(--orange);
+}
+
+nav a.nav-cta:hover {
+    background: var(--orange-dark);
+    border-color: var(--orange-dark);
+    color: #fff;
+}
+
+.pt-principal {
+    min-height: calc(100vh - 74px);
+    display: grid;
+    align-items: center;
+    padding: 80px 20px;
+    color: #fff;
+    background:
+        linear-gradient(90deg, rgba(19, 44, 31, 0.86), rgba(19, 44, 31, 0.54), rgba(19, 44, 31, 0.2)),
+        url("../IMG_G/IMG_PAGE/acceuil.jpg") center / cover;
+}
+
+.hero-contenu {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+}
+
+.accroche,
+.sur-titre {
+    margin: 0 0 12px;
+    color: var(--orange);
+    font-size: 0.92rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.hero-contenu h1 {
+    max-width: 760px;
+    margin: 0 0 14px;
+    font-size: clamp(3rem, 8vw, 6.8rem);
+    line-height: 0.92;
+    letter-spacing: 0;
+}
+
+.hero-contenu h2 {
+    max-width: 680px;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: clamp(1.05rem, 2.2vw, 1.55rem);
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 30px;
+}
+
+.btn-principal,
+.btn-secondaire {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 22px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 800;
+    border: 2px solid transparent;
+    transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.btn-principal {
+    background: var(--orange);
+    color: #fff;
+}
+
+.btn-principal:hover {
+    background: var(--orange-dark);
+    transform: translateY(-2px);
+}
+
+.btn-secondaire {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.72);
+}
+
+.btn-secondaire:hover {
+    background: #fff;
+    color: var(--green);
+    transform: translateY(-2px);
+}
+
+.presentation,
+.pt-principal2,
+.avantages,
+.appel-action {
+    width: min(1180px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 76px 0;
+}
+
+.presentation {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 430px);
+    gap: 42px;
+    align-items: center;
+}
+
+.presentation h1,
+.pt-principal2 > h1,
+.avantages > h1,
+.appel-action h1 {
+    margin: 0 0 16px;
+    color: var(--green);
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    line-height: 1.08;
+    letter-spacing: 0;
+}
+
+.presentation p,
+.intro-section,
+.avantages p,
+.appel-action p,
+.img p {
+    color: var(--muted);
+    font-size: 1.03rem;
+    line-height: 1.7;
+}
+
+.presentation-image img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.pt-principal2 {
+    text-align: center;
+}
+
+.intro-section {
+    max-width: 760px;
+    margin: 0 auto 34px;
+}
+
+.generale,
+.avantages-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.img,
+.avantages-list article {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 14px 32px rgba(31, 36, 32, 0.08);
+    overflow: hidden;
+}
+
+.img {
+    text-align: left;
+    transform: translateY(18px);
+    opacity: 1;
+}
+
+.img.hidden {
+    opacity: 0;
+}
+
+.img.visible {
+    animation: cardIn 0.65s ease forwards;
+}
+
+.img h1 {
+    margin: 0;
+    padding: 22px 22px 14px;
+    color: var(--green);
+    font-size: 1.35rem;
+}
+
+.img img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+.img p {
+    margin: 0;
+    padding: 18px 22px 24px;
+}
+
+.avantages {
+    padding-top: 40px;
+}
+
+.avantages > h1 {
+    text-align: center;
+    margin-bottom: 34px;
+}
+
+.avantages-list article {
+    padding: 26px;
+}
+
+.avantages-list span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    margin-bottom: 20px;
+    border-radius: 50%;
+    background: rgba(36, 92, 58, 0.1);
+    color: var(--green);
+    font-weight: 800;
+}
+
+.avantages-list h2 {
+    margin: 0 0 10px;
+    color: var(--ink);
+    font-size: 1.25rem;
+}
+
+.avantages-list p {
+    margin: 0;
+}
+
+.appel-action {
+    width: min(980px, calc(100% - 32px));
+    margin-bottom: 70px;
+    padding: 52px;
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    background:
+        linear-gradient(90deg, rgba(36, 92, 58, 0.95), rgba(36, 92, 58, 0.78)),
+        url("../IMG1/D.jpg") center / cover;
+    box-shadow: var(--shadow);
+}
+
+.appel-action h1,
+.appel-action p {
+    color: #fff;
+}
+
+.appel-action .hero-actions {
+    justify-content: center;
+}
+
+
+.logout-success{
+
+    width:fit-content;
+
+    margin:25px auto;
+
+    background:#d4edda;
+
+    color:#155724;
+
+    padding:15px 30px;
+
+    border-radius:10px;
+
+    font-weight:bold;
+
+    animation:fadeIn .4s ease;
+
+}
+
+@keyframes fadeIn{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(-20px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+footer {
+    padding: 42px 20px;
+    background: #18261d;
+    color: rgba(255, 255, 255, 0.78);
+    text-align: center;
+}
+
+footer h2 {
+    margin: 0 0 12px;
+    color: #fff;
+}
+
+footer p {
+    margin: 8px 0;
+}
+
+@keyframes cardIn {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 900px) {
+    nav {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 14px 0;
+    }
+
+    .list {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    nav a {
+        min-height: 38px;
+        padding: 0 10px;
+        font-size: 0.92rem;
+    }
+
+    .pt-principal {
+        min-height: 680px;
+        padding-top: 70px;
+    }
+
+    .presentation,
+    .generale,
+    .avantages-list {
+        grid-template-columns: 1fr;
+    }
+
+    .presentation {
+        padding-top: 54px;
+    }
+
+    .presentation-image img {
+        aspect-ratio: 16 / 10;
+    }
+
+    .appel-action {
+        padding: 42px 22px;
+    }
+}
+
+@media (max-width: 540px) {
+    nav {
+        width: min(100% - 20px, 1180px);
+    }
+
+    .list {
+        gap: 4px;
+    }
+
+    nav a {
+        font-size: 0.86rem;
+    }
+
+    .pt-principal {
+        min-height: 620px;
+        padding: 54px 16px;
+        background:
+            linear-gradient(90deg, rgba(19, 44, 31, 0.9), rgba(19, 44, 31, 0.66)),
+            url("../IMG1/serrah-galos-bVMnhNOfFCo-unsplash.jpg") center / cover;
+    }
+
+    .hero-actions,
+    .appel-action .hero-actions {
+        flex-direction: column;
+    }
+
+    .btn-principal,
+    .btn-secondaire {
+        width: 100%;
+    }
+
+    .presentation,
+    .pt-principal2,
+    .avantages {
+        width: min(100% - 24px, 1180px);
+        padding: 48px 0;
+    }
+}

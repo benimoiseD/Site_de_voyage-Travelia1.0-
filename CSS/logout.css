@@ -1,0 +1,121 @@
+.logout-modal{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,.55);
+
+    display:none;
+
+    justify-content:center;
+
+    align-items:center;
+
+    z-index:99999;
+
+    backdrop-filter:blur(5px);
+
+}
+
+.logout-modal.active{
+
+    display:flex;
+
+}
+
+.logout-box{
+
+    background:#fff;
+
+    width:420px;
+
+    max-width:92%;
+
+    border-radius:18px;
+
+    padding:30px;
+
+    text-align:center;
+
+    animation:popup .25s ease;
+
+    box-shadow:0 15px 45px rgba(0,0,0,.25);
+
+}
+
+.logout-icon{
+
+    font-size:55px;
+
+    color:#0066cc;
+
+    margin-bottom:15px;
+
+}
+
+.logout-buttons{
+
+    margin-top:25px;
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:15px;
+
+}
+
+.logout-buttons button{
+
+    border:none;
+
+    padding:12px 24px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    background:#ddd;
+
+}
+
+.logout-buttons a{
+
+    text-decoration:none;
+
+    background:#d62828;
+
+    color:white;
+
+    padding:12px 24px;
+
+    border-radius:8px;
+
+}
+
+.logout-buttons a:hover{
+
+    background:#b71c1c;
+
+}
+
+@keyframes popup{
+
+    from{
+
+        opacity:0;
+
+        transform:scale(.85);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:scale(1);
+
+    }
+
+}
