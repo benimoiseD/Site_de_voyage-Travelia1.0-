@@ -106,7 +106,6 @@ $csrfToken = csrf_token();
                         <label for="type">Type de séjour *</label>
                         <select id="type" name="type" required>
                             <option value="">Sélectionnez un type</option>
-                            <option value="circuit">Circuit accompagné</option>
                             <option value="individuel">Voyage individuel</option>
                             <option value="groupe">Voyage en groupe</option>
                             <option value="lune_de_miel">Lune de miel</option>
