@@ -75,10 +75,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     <meta name="description" content="Découvrez les meilleures destinations touristiques avec SAFARI-RDC+">
     <title>SAFARI-RDC+</title>
     <link rel="stylesheet" href="CSS/inscription.css">
+    <link rel="stylesheet" href="CSS/animations.css?v=1.0">
 </head>
 
 <body>
-    <main class="hero">
+    <main class="hero page-transition">
         <div class="brand">
             <h1>SAFARI-RDC+</h1>
             <p class="tag">Explorez des voyages authentiques hors des sentiers battus.</p>

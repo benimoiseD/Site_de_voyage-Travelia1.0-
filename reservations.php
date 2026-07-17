@@ -52,15 +52,22 @@ $csrfToken = csrf_token();
     <meta name="description" content="Mes réservations SAFARI-RDC+">
     <title><?= htmlspecialchars($pageTitle) ?></title>
     <link rel="stylesheet" href="CSS/header.css?v=1.5">
+    <link rel="stylesheet" href="CSS/animations.css?v=1.0">
     <?php foreach ($pageStyles as $style): ?>
         <link rel="stylesheet" href="<?= htmlspecialchars($style) ?>">
     <?php endforeach; ?>
 </head>
 <body>
 
+<!-- Loader Overlay -->
+<div id="loaderOverlay" class="loader-overlay">
+    <div class="loader"></div>
+    <div class="loader-text">Traitement en cours...</div>
+</div>
+
 <?php include 'INCLUDE/header.php'; ?>
 
-<main class="reservations">
+<main class="reservations page-transition">
     <section class="reservations-hero">
         <div class="reservations-shell reservations-hero-inner">
             <p class="eyebrow">Mes réservations</p>
@@ -107,9 +114,11 @@ $csrfToken = csrf_token();
                         <select id="type" name="type" required>
                             <option value="">Sélectionnez un type</option>
                             <option value="individuel">Voyage individuel</option>
+                            <option value="couple">Voyage en couple</option>
                             <option value="groupe">Voyage en groupe</option>
                             <option value="lune_de_miel">Lune de miel</option>
                             <option value="famille">Voyage en famille</option>
+                            <option value="aventure">Voyage d'aventure</option>
                         </select>
                     </div>
                     
@@ -134,9 +143,10 @@ $csrfToken = csrf_token();
         
         const submitBtn = document.getElementById('submitBtn');
         const formMessage = document.getElementById('formMessage');
+        const loaderOverlay = document.getElementById('loaderOverlay');
         
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement en cours...';
+        loaderOverlay.classList.add('active');
         
         const formData = new FormData(this);
         
@@ -148,6 +158,7 @@ $csrfToken = csrf_token();
             
             const result = await response.json();
             
+            loaderOverlay.classList.remove('active');
             formMessage.style.display = 'block';
             
             if (result.success) {
@@ -161,14 +172,13 @@ $csrfToken = csrf_token();
                 formMessage.className = 'form-message error';
                 formMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + result.message;
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirmer la réservation';
             }
         } catch (error) {
+            loaderOverlay.classList.remove('active');
             formMessage.style.display = 'block';
             formMessage.className = 'form-message error';
             formMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Une erreur est survenue. Veuillez réessayer.';
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirmer la réservation';
         }
     });
     </script>

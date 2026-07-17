@@ -139,6 +139,7 @@ $userInitials = dashboardInitials($_SESSION['Nom_users']);
     <meta name="description" content="Tableau de bord voyageur SAFARI-RDC+">
     <title><?= htmlspecialchars($pageTitle) ?></title>
     <link rel="stylesheet" href="CSS/header.css?v=1.5">
+    <link rel="stylesheet" href="CSS/animations.css?v=1.5">
     <?php foreach ($pageStyles as $style): ?>
         <link rel="stylesheet" href="<?= htmlspecialchars($style) ?>">
     <?php endforeach; ?>

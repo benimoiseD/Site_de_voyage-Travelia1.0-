@@ -8,6 +8,7 @@
     <meta name="description" content="SAFARI-RDC+ vous aide à découvrir des voyages, safaris et destinations autour de la RDC avant de créer votre compte.">
     <title>SAFARI-RDC+ | Bienvenue</title>
     <link rel="stylesheet" href="CSS/ind.css">
+    <link rel="stylesheet" href="CSS/animations.css?v=1.0">
 </head>
 <body>
 

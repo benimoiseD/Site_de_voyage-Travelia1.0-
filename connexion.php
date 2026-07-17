@@ -103,10 +103,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <meta name="description" content="Connectez-vous à votre compte SAFARI-RDC+.">
     <title>SAFARI-RDC+ | Connexion</title>
     <link rel="stylesheet" href="CSS/inscription.css">
+    <link rel="stylesheet" href="CSS/animations.css?v=1.0">
 </head>
 
 <body>
-    <main class="hero">
+    <main class="hero page-transition">
         <div class="brand">
             <h1>SAFARI-RDC+</h1>
             <p class="tag">Retrouvez vos informations et continuez la préparation de votre voyage.</p>

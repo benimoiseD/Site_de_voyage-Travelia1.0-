@@ -16,6 +16,7 @@ if (!isset($_SESSION["Id"])) {
     <meta name="description" content="Explorez les plus belles destinations de la RDC et des pays voisins avec SAFARI-RDC+.">
     <title>SAFARI-RDC+ | Accueil</title>
     <link rel="stylesheet" href="CSS/ind.css?v=1.0">
+    <link rel="stylesheet" href="CSS/animations.css?v=1.5">
 </head>
 <body>
 

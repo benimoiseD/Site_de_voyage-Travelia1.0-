@@ -6,6 +6,7 @@
     <meta name="Description" content="Découvrez qui nous sommes, notre mission et notre équipe.">
     <title>SAFARI-RDC+ | À propos</title>
     <link rel="stylesheet" href="CSS/apropos.css">
+    <link rel="stylesheet" href="CSS/animations.css?v=1.5">
 </head>
 <body>
 

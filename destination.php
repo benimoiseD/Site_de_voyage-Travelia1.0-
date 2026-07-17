@@ -25,6 +25,7 @@ if ($stmt) {
     <title><?= htmlspecialchars($pageTitle) ?></title>
     <link rel="stylesheet" href="CSS/destination.css?v=1.6">
     <link rel="stylesheet" href="CSS/header.css?v=1.5">
+    <link rel="stylesheet" href="CSS/animations.css?v=1.5">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -70,9 +71,6 @@ if ($stmt) {
                                     <span class="price-label">À partir de</span>
                                     <span class="price-value"><?= htmlspecialchars(number_format($destination['prix'], 2, ',', ' ')) ?> $</span>
                                 </div>
-                                <button class="btn-book" onclick="openBooking(<?= (int)$destination['id'] ?>, <?= htmlspecialchars($destination['prix']) ?>)">
-                                    <i class="fas fa-calendar-check"></i> Réserver
-                                </button>
                             </div>
                         </div>
                     </div>

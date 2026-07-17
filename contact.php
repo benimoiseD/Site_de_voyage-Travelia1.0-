@@ -6,6 +6,7 @@
     <meta name="Description" content="Contactez-nous pour toute question ou demande d'information.">
     <title>SAFARI-RDC+ | Contact</title>
     <link rel="stylesheet" href="CSS/contact.css?v=2">
+    <link rel="stylesheet" href="CSS/animations.css?v=1.5">
 </head>
 <body>
 
