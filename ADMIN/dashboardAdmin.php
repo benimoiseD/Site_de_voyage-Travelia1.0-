@@ -1,7 +1,7 @@
 <?php
-session_start();
-require_once __DIR__ . '/../Base_des_donnees/db.php';
 require_once __DIR__ . '/../INCLUDE/fonction.php';
+secure_session_start();
+require_once __DIR__ . '/../Base_des_donnees/db.php';
 
 if (!isset($_SESSION['Id']) || ($_SESSION['role'] ?? 'client') !== 'admin') {
     header('Location: ../connexion.php');

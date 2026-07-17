@@ -48,7 +48,7 @@ include 'include/header.php';
         </p>
     </div>
     <div class="presentation-image">
-        <img src="IMG_G/IMG1/B.jpg" alt="Paysage touristique en RDC">
+            <img src="IMG_G/IMG_PAGE/index.jpg" alt="Voyageur explorant seul">
     </div>
 </section>
 
@@ -59,15 +59,15 @@ include 'include/header.php';
 
         <article class="img">
             <h1>Voyage en Solo</h1>
-            <img src="IMG_G/IMG/3.jpg" alt="Voyageur explorant seul">
+            <img src="IMG_G/IMG_PAGE/solo.jpg" alt="Voyageur explorant seul">
             <p>
-                Partez librement à la découverte des perles naturelles, des cultures locales et des grands espaces.
+                Partez librement à l-a découverte des perles naturelles, des cultures locales et des grands espaces.
             </p>
         </article>
 
         <article class="img">
             <h1>Voyage en Couple</h1>
-            <img src="IMG_G/IMG/1.jpg" alt="Voyage en couple">
+            <img src="IMG_G/IMG_PAGE/couple.jpg" alt="Voyage en couple">
             <p>
                 Vivez une escapade douce et mémorable entre lacs, montagnes, réserves et villes animées.
             </p>
@@ -75,9 +75,33 @@ include 'include/header.php';
 
         <article class="img">
             <h1>Voyage en Famille</h1>
-            <img src="IMG_G/IMG/2.webp" alt="Voyage en famille">
+            <img src="IMG_G/IMG_PAGE/famille.jpg" alt="Voyage en famille">
             <p>
                 Offrez à toute la famille une aventure sûre, enrichissante et adaptée à chaque âge.
+            </p>
+        </article>
+
+        <article class="img">
+            <h1>Voyage en Groupe</h1>
+            <img src="IMG_G/IMG_PAGE/groupe.jpg" alt="Voyage en groupe">
+            <p>
+                Explorez ensemble des destinations uniques, avec des activités et des hébergements adaptés à tous.
+            </p>
+        </article>
+
+        <article class="img">
+            <h1>Lune de Miel</h1>
+            <img src="IMG_G/IMG_PAGE/lune_de_miel.jpg" alt="Voyage d'aventure">
+            <p>
+                Plongez dans des expériences palpitantes, des safaris aux randonnées, pour les amateurs de sensations fortes.
+            </p>
+        </article>
+
+        <article class="img">
+            <h1>Voyage d'Aventure</h1>
+            <img src="IMG_G/IMG_PAGE/aventure.jpg" alt="Voyage d'aventure">
+            <p>
+                Plongez dans des expériences palpitantes, des safaris aux randonnées, pour les amateurs de sensations fortes.
             </p>
         </article>
 
@@ -114,12 +138,7 @@ include 'include/header.php';
     </div>
 </section>
 
-<footer id="contact">
-    <h2>Contactez-nous</h2>
-    <p>Email : support@voyage.com</p>
-    <p>Téléphone : (+243) 821474532</p>
-    <p>&copy; <?php echo date('Y'); ?> SAFARI-RDC+. Tous droits réservés.</p>
-</footer>
+<?php include 'include/footer.php'; ?>
 
 <script src="JS/index.js"></script>
 

@@ -1,7 +1,7 @@
 <?php
-session_start();
-require_once __DIR__ . '/BASE_DES_DONNEES/db.php';
 require_once __DIR__ . '/INCLUDE/fonction.php';
+secure_session_start();
+require_once __DIR__ . '/BASE_DES_DONNEES/db.php';
 
 $erreur = '';
 $name = $_POST['name'] ?? '';
@@ -11,16 +11,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
         $erreur = 'Jeton CSRF invalide.';
     } else {
-        $name = trim($name);
-        $email = trim($email);
+        $name = sanitize_string($_POST['name'] ?? '');
+        $email = sanitize_string($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
         if (empty($name) || empty($email) || empty($password)) {
             $erreur = 'Tous les champs sont obligatoires.';
-        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        } elseif (!validate_name($name)) {
+            $erreur = 'Le nom contient des caractères invalides.';
+        } elseif (!validate_length($name, 2, 100)) {
+            $erreur = 'Le nom doit contenir entre 2 et 100 caractères.';
+        } elseif (!validate_email($email)) {
             $erreur = 'Adresse email invalide.';
-        } elseif (strlen($password) < 6) {
-            $erreur = 'Le mot de passe doit contenir au moins 6 caractères.';
+        } elseif (!validate_password($password)) {
+            $erreur = 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.';
         } else {
             $stmt = $conn->prepare('SELECT Id FROM users WHERE Email = ?');
 
@@ -30,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                 $stmt->store_result();
 
                 if ($stmt->num_rows > 0) {
-                    $erreur = 'Cet email est déjà utilisé.';
+                    $erreur = 'Impossible de créer le compte. Veuillez vérifier vos informations.';
                 } else {
                     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
                     $role = 'client';
@@ -111,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                     <input type="email" id="email" name="email" required autocomplete="email" placeholder="vous@exemple.com" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
                 </label>
                 <label>Mot de passe
-                    <input type="password" id="password" name="password" required minlength="6" autocomplete="new-password" placeholder="Choisissez un mot de passe">
+                    <input type="password" id="password" name="password" required minlength="8" autocomplete="new-password" placeholder="Choisissez un mot de passe (8+ caractères, majuscule, minuscule, chiffre)">
                 </label>
                 <?= csrf_input_field() ?>
                 <button type="submit" name="submit" id="submiti" class="btn-primary">S'inscrire</button>

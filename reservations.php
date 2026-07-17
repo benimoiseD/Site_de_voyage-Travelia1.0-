@@ -1,7 +1,7 @@
 <?php
-session_start();
-require_once __DIR__ . '/BASE_DES_DONNEES/db.php';
 require_once __DIR__ . '/INCLUDE/fonction.php';
+secure_session_start();
+require_once __DIR__ . '/BASE_DES_DONNEES/db.php';
 
 if (!isset($_SESSION['Id'])) {
     header('Location: connexion.php');

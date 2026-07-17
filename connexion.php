@@ -1,7 +1,7 @@
 <?php
-session_start();
-require_once __DIR__ . '/Base_des_donnees/db.php';
 require_once __DIR__ . '/INCLUDE/fonction.php';
+secure_session_start();
+require_once __DIR__ . '/Base_des_donnees/db.php';
 
 $erreur = '';
 $success = isset($_GET['deconnecte']) ? 'Vous avez été déconnecté avec succès.' : '';
@@ -10,13 +10,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
         $erreur = 'Jeton CSRF invalide.';
     } else {
-        $email = trim($_POST['loginEmail'] ?? '');
+        $email = sanitize_string($_POST['loginEmail'] ?? '');
         $password = $_POST['loginPassword'] ?? '';
 
         if (empty($email) || empty($password)) {
             $erreur = 'Veuillez renseigner l\'email et le mot de passe.';
-        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        } elseif (!validate_email($email)) {
             $erreur = 'Adresse email invalide.';
+        } elseif (!can_attempt_login($email)) {
+            $waitTime = get_login_wait_time($email);
+            $minutes = ceil($waitTime / 60);
+            $erreur = "Trop de tentatives. Veuillez réessayer dans $minutes minute(s).";
         } else {
             $stmt = $conn->prepare('SELECT Id, Nom_users, Email, MotDePasse, role, created_at FROM users WHERE Email = ?');
 
@@ -29,6 +33,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $user = $result->fetch_assoc();
 
                     if (password_verify($password, $user['MotDePasse'])) {
+                        reset_login_attempts($email);
+
+                        // Vérifier si le hash doit être mis à jour (pour les futures mises à jour de PHP)
+                        if (password_needs_rehash($user['MotDePasse'], PASSWORD_DEFAULT)) {
+                            $newHash = password_hash($password, PASSWORD_DEFAULT);
+                            $updateStmt = $conn->prepare('UPDATE users SET MotDePasse = ? WHERE Id = ?');
+                            if ($updateStmt) {
+                                $updateStmt->bind_param('si', $newHash, $user['Id']);
+                                $updateStmt->execute();
+                            }
+                        }
+
                         $role = $user['role'] ?? 'client';
                         $role = in_array($role, ['admin', 'client'], true) ? $role : 'client';
 
@@ -44,7 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
 
-                $erreur = 'Email ou mot de passe incorrect.';
+                $remaining = record_failed_login_attempt($email);
+                $erreur = 'Email ou mot de passe incorrect. Tentatives restantes: ' . $remaining;
             } else {
                 $erreur = 'Erreur interne, veuillez réessayer.';
             }
