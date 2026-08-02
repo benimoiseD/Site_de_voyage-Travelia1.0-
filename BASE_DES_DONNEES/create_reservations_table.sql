@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS reservations (
     guests INT NOT NULL,
     type_sejour VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL,
+    notes TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(Id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

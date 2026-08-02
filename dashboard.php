@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/INCLUDE/fonction.php';
+require_once __DIR__ . '/INCLUDE/db.php';
 secure_session_start();
-require_once __DIR__ . '/BASE_DES_DONNEES/db.php';
+
+$conn = get_db_connection();
 
 if (!isset($_SESSION['Id'])) {
     header('Location: connexion.php');
@@ -25,7 +27,7 @@ if (file_exists($avatarsFile)) {
 }
 
 $userReservations = [];
-$stmt = $conn->prepare('SELECT destination, date_depart, guests, type_sejour, created_at FROM reservations WHERE user_id = ? ORDER BY created_at DESC');
+$stmt = $conn->prepare('SELECT destination, date_depart, guests, type_sejour, notes, created_at FROM reservations WHERE user_id = ? ORDER BY created_at DESC');
 if ($stmt) {
     $stmt->bind_param('i', $_SESSION['Id']);
     $stmt->execute();
@@ -42,16 +44,6 @@ $recentReservations = array_slice($userReservations, 0, 3);
 $avatarPath = $avatars[$_SESSION['Id']] ?? '';
 if ($avatarPath && !file_exists(__DIR__ . '/' . $avatarPath)) {
     $avatarPath = '';
-}
-
-function dashboardInitials(string $fullName): string
-{
-    $parts = preg_split('/\s+/', trim($fullName));
-    $initials = '';
-    foreach (array_slice($parts, 0, 2) as $part) {
-        $initials .= mb_strtoupper(mb_substr($part, 0, 1));
-    }
-    return $initials ?: '?';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
@@ -96,31 +88,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     if (empty($error) && isset($_FILES['avatar']) && $_FILES['avatar']['error'] !== UPLOAD_ERR_NO_FILE) {
         $allowedTypes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
         $avatarFile = $_FILES['avatar'];
-        $fileInfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($fileInfo, $avatarFile['tmp_name']);
-        finfo_close($fileInfo);
 
-        if (!isset($allowedTypes[$mimeType])) {
-            $error = 'Format de photo invalide. Utilisez JPEG, PNG ou WebP.';
-        } elseif ($avatarFile['size'] > 2 * 1024 * 1024) {
-            $error = 'La photo doit faire moins de 2 Mo.';
+        if ($avatarFile['error'] !== UPLOAD_ERR_OK) {
+            $error = upload_error_message($avatarFile['error']);
         } else {
-            $extension = $allowedTypes[$mimeType];
-            $uploadDir = __DIR__ . '/uploads/avatars';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-            $targetName = 'avatar_' . $_SESSION['Id'] . '.' . $extension;
-            $targetPath = $uploadDir . '/' . $targetName;
+            $fileInfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_file($fileInfo, $avatarFile['tmp_name']);
+            finfo_close($fileInfo);
 
-            if (move_uploaded_file($avatarFile['tmp_name'], $targetPath)) {
-                $avatarPath = 'uploads/avatars/' . $targetName;
-                $avatars[$_SESSION['Id']] = $avatarPath;
-                file_put_contents($avatarsFile, json_encode($avatars, JSON_PRETTY_PRINT));
-                $_SESSION['avatar'] = $avatarPath;
-                $success = 'Profil mis à jour et photo envoyée avec succès.';
+            if (!isset($allowedTypes[$mimeType])) {
+                $error = 'Format de photo invalide. Utilisez JPEG, PNG ou WebP.';
+            } elseif ($avatarFile['size'] > 2 * 1024 * 1024) {
+                $error = 'La photo doit faire moins de 2 Mo.';
             } else {
-                $error = 'Impossible de téléverser la photo. Veuillez réessayer.';
+                $extension = $allowedTypes[$mimeType];
+                $uploadDir = __DIR__ . '/uploads/avatars';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                $targetName = 'avatar_' . $_SESSION['Id'] . '.' . $extension;
+                $targetPath = $uploadDir . '/' . $targetName;
+
+                if (move_uploaded_file($avatarFile['tmp_name'], $targetPath)) {
+                    $avatarPath = 'uploads/avatars/' . $targetName;
+                    $avatars[$_SESSION['Id']] = $avatarPath;
+                    file_put_contents($avatarsFile, json_encode($avatars, JSON_PRETTY_PRINT));
+                    $_SESSION['avatar'] = $avatarPath;
+                    $success = 'Profil mis à jour et photo envoyée avec succès.';
+                } else {
+                    $error = 'Impossible de téléverser la photo. Veuillez réessayer.';
+                }
             }
         }
     }
@@ -128,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
 }
 
 $pageTitle = "SAFARI-RDC+ | Tableau de bord";
-$pageStyles = ['CSS/dashboard.css?v=5'];
+$pageStyles = ['CSS/dashboard.css?v=1.2', 'CSS/header.css?v=1.2', 'CSS/animations.css?v=1.5'];
 $userInitials = dashboardInitials($_SESSION['Nom_users']);
 ?>
 <!DOCTYPE html>
@@ -138,7 +135,7 @@ $userInitials = dashboardInitials($_SESSION['Nom_users']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Tableau de bord voyageur SAFARI-RDC+">
     <title><?= htmlspecialchars($pageTitle) ?></title>
-    <link rel="stylesheet" href="CSS/header.css?v=1.5">
+    <link rel="stylesheet" href="CSS/header.css?v=1.2">
     <link rel="stylesheet" href="CSS/animations.css?v=1.5">
     <?php foreach ($pageStyles as $style): ?>
         <link rel="stylesheet" href="<?= htmlspecialchars($style) ?>">
@@ -146,7 +143,7 @@ $userInitials = dashboardInitials($_SESSION['Nom_users']);
 </head>
 <body>
 
-<?php include 'INCLUDE/header.php'; ?>
+<?php require_once __DIR__ . '/INCLUDE/header.php'; ?>
 
 <main class="dashboard">
     <header class="dashboard-hero">
@@ -252,11 +249,11 @@ $userInitials = dashboardInitials($_SESSION['Nom_users']);
                         <?= csrf_input_field() ?>
                         <div class="form-row">
                             <label for="profile-name">Nom complet</label>
-                            <input type="text" id="profile-name" name="name" value="<?= htmlspecialchars($name) ?>" required>
+                            <input type="text" id="profile-name" name="name" value="<?= htmlspecialchars($name) ?>" autocomplete="name" required>
                         </div>
                         <div class="form-row">
                             <label for="profile-email">Adresse email</label>
-                            <input type="email" id="profile-email" name="email" value="<?= htmlspecialchars($email) ?>" required>
+                            <input type="email" id="profile-email" name="email" value="<?= htmlspecialchars($email) ?>" autocomplete="email" required>
                         </div>
                         <div class="form-row">
                             <label for="profile-avatar">Photo de profil</label>
@@ -291,18 +288,21 @@ $userInitials = dashboardInitials($_SESSION['Nom_users']);
                                         <strong><?= htmlspecialchars($reservation['destination']) ?></strong>
                                         <span><?= htmlspecialchars($reservation['type_sejour'] ?? 'Séjour') ?></span>
                                     </div>
-                                    <dl class="reservation-item-meta">
-                                        <div>
-                                            <dt>Départ</dt>
-                                            <dd><?= htmlspecialchars($reservation['date_depart'] ?? '—') ?></dd>
-                                        </div>
-                                        <div>
-                                            <dt>Voyageurs</dt>
-                                            <dd><?= htmlspecialchars((string) ($reservation['guests'] ?? '—')) ?></dd>
-                                        </div>
-                                    </dl>
-                                </li>
-                            <?php endforeach; ?>
+                                <dl class="reservation-item-meta">
+                                    <div>
+                                        <dt>Départ</dt>
+                                        <dd><?= htmlspecialchars($reservation['date_depart'] ?? '—') ?></dd>
+                                    </div>
+                                    <div>
+                                        <dt>Voyageurs</dt>
+                                        <dd><?= htmlspecialchars((string) ($reservation['guests'] ?? '—')) ?></dd>
+                                    </div>
+                                </dl>
+                                <?php if (!empty($reservation['notes'])): ?>
+                                    <p class="reservation-notes"><?= htmlspecialchars($reservation['notes']) ?></p>
+                                <?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
                         </ul>
                     <?php endif; ?>
                 </article>
@@ -311,7 +311,7 @@ $userInitials = dashboardInitials($_SESSION['Nom_users']);
     </div>
 </main>
 
-<?php include 'INCLUDE/footer.php'; ?>
+<?php require_once __DIR__ . '/INCLUDE/footer.php'; ?>
 
 
 </body>

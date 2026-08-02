@@ -1,21 +1,18 @@
 <?php
-$host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "travelia2_safari_rdc";
+require_once __DIR__ . '/../config.php';
+
+$host = DB_HOST;
+$user = DB_USER;
+$pass = DB_PASSWORD;
+$dbname = DB_NAME;
 
 $conn = new mysqli($host, $user, $pass, $dbname);
 
-if ($conn->connect_error){
-    die("Connexion failed: " . $conn->connect_error);
+if ($conn->connect_error) {
+    die('Connexion failed: ' . $conn->connect_error);
 }
 
-$conn->set_charset('utf8mb4');
+$conn->set_charset(DB_CHARSET);
 
-/*try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Erreur connexion : " . $e->getMessage());
-}*/
+
 ?>

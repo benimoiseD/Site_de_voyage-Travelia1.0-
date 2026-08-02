@@ -1,30 +1,33 @@
 <?php
 require_once __DIR__ . '/INCLUDE/fonction.php';
+require_once __DIR__ . '/INCLUDE/db.php';
 secure_session_start();
-require_once __DIR__ . '/Base_des_donnees/db.php';
 
-$erreur = '';
+$conn = get_db_connection();
+$error = '';
 $success = isset($_GET['deconnecte']) ? 'Vous avez été déconnecté avec succès.' : '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
-        $erreur = 'Jeton CSRF invalide.';
+        $error = 'Jeton CSRF invalide.';
     } else {
         $email = sanitize_string($_POST['loginEmail'] ?? '');
         $password = $_POST['loginPassword'] ?? '';
 
         if (empty($email) || empty($password)) {
-            $erreur = 'Veuillez renseigner l\'email et le mot de passe.';
+            $error = 'Veuillez renseigner l\'email et le mot de passe.';
         } elseif (!validate_email($email)) {
-            $erreur = 'Adresse email invalide.';
-        } elseif (!can_attempt_login($email)) {
-            $waitTime = get_login_wait_time($email);
+            $error = 'Adresse email invalide.';
+        } elseif (!can_attempt_login($conn, $email)) {
+            $waitTime = get_login_wait_time($conn, $email);
             $minutes = ceil($waitTime / 60);
-            $erreur = "Trop de tentatives. Veuillez réessayer dans $minutes minute(s).";
+            $error = "Trop de tentatives. Veuillez réessayer dans $minutes minute(s).";
         } else {
             $stmt = $conn->prepare('SELECT Id, Nom_users, Email, MotDePasse, role, created_at FROM users WHERE Email = ?');
 
-            if ($stmt) {
+            if (!$stmt) {
+                $error = sql_error_message('préparer la requête de connexion');
+            } else {
                 $stmt->bind_param('s', $email);
                 $stmt->execute();
                 $result = $stmt->get_result();
@@ -33,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $user = $result->fetch_assoc();
 
                     if (password_verify($password, $user['MotDePasse'])) {
-                        reset_login_attempts($email);
+                        reset_login_attempts($conn, $email);
 
                         // Vérifier si le hash doit être mis à jour (pour les futures mises à jour de PHP)
                         if (password_needs_rehash($user['MotDePasse'], PASSWORD_DEFAULT)) {
@@ -60,39 +63,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
 
-                $remaining = record_failed_login_attempt($email);
-                $erreur = 'Email ou mot de passe incorrect. Tentatives restantes: ' . $remaining;
-            } else {
-                $erreur = 'Erreur interne, veuillez réessayer.';
+                $remaining = record_failed_login_attempt($conn, $email);
+                $error = 'Email ou mot de passe incorrect. Tentatives restantes: ' . $remaining;
             }
         }
     }
 }
 
 
-/*$erreur = "";
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-
-    $email = trim($_POST["loginEmail"]);
-    $password = $_POST["loginPassword"];
-
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE Email = ?");
-    $stmt->execute([$email]);
-    
-
-    if ($user && password_verify($password, $user["MotDePasse"])) {
-
-        $_SESSION["user_id"] = $user["Id"];
-        $_SESSION["username"] = $user["Nom_users"];
-
-        header("Location: accueil.php");
-        exit;
-
-        } else ($user) {
-          $erreur = "Erreur lors de l'inscription."
-        };
-}*/
 ?>
 
 <!DOCTYPE html>
@@ -131,9 +110,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </div>
             <?php endif; ?>
 
-            <?php if (!empty($erreur)): ?>
+            <?php if (!empty($error)): ?>
                 <div class="auth-message error">
-                    <?= htmlspecialchars($erreur) ?>
+                    <?= htmlspecialchars($error) ?>
                 </div>
             <?php endif; ?>
 
@@ -152,7 +131,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </section>
     </main>
 
-    <?php include 'include/footer.php'; ?>
+    <?php require_once __DIR__ . '/INCLUDE/footer.php'; ?>
+
 
     <script src="JS/inscription_connexion.js?v=2"></script>
 </body>

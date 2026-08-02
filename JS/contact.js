@@ -35,35 +35,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-// Validation et gestion du formulaire de contact
-   document.getElementById('contactForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const nom = document.getElementById('nom').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const message = document.getElementById('message').value.trim();
-    const formMessage = document.getElementById('formMessage');
-    let error = "";
+// Validation et soumission du formulaire de contact
+const contactForm = document.getElementById('contactForm');
+if (contactForm) {
+    contactForm.addEventListener('submit', function (e) {
+        e.preventDefault();
 
-    // Validation simple
-    if (nom.length < 2) {
-        error = "Veuillez entrer un nom valide.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        error = "Veuillez entrer un email valide.";
-    } else if (message.length < 5) {
-        error = "Le message est trop court.";
-    }
+        const nom = document.getElementById('nom').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const message = document.getElementById('message').value.trim();
+        const formMessage = document.getElementById('formMessage');
+        let error = '';
 
-    if (error) {
-        formMessage.textContent = error;
-        formMessage.style.color = "red";
-    } else {
-        formMessage.textContent = "Merci pour votre message, " + nom + " ! Nous vous répondrons rapidement.";
-        formMessage.style.color = "green";
-        this.reset();
-        // Faire disparaître le message après 3 secondes
-        setTimeout(() => {
-            formMessage.textContent = "";
-        }, 3000);
-    }
-});
+        if (nom.length < 2) {
+            error = 'Veuillez entrer un nom valide.';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            error = 'Veuillez entrer un email valide.';
+        } else if (message.length < 10) {
+            error = 'Le message est trop court.';
+        }
+
+        if (error) {
+            formMessage.textContent = error;
+            formMessage.style.color = 'red';
+            return;
+        }
+
+        formMessage.textContent = 'Envoi en cours...';
+        formMessage.style.color = 'green';
+        this.submit();
+    });
+}
 

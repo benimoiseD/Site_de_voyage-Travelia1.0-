@@ -2,158 +2,69 @@
 require_once __DIR__ . '/fonction.php';
 secure_session_start();
 
-
-
-/**
-
- * BASE URL (plus stable après réorganisation)
-
- */
+$site_title = $site_title ?? 'Travelia';
+$page_title = $page_title ?? '';
 
 $siteBase = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
-
 $siteBase = str_replace('\\', '/', $siteBase);
-
 $siteBase = preg_replace('#/(ADMIN|include)$#i', '', $siteBase);
 
-
-
-/**
-
- * SESSION(Gestion utilisateur)
-
- */
-
-$isLoggedIn = isset($_SESSION['Nom_users']);
-
-
-
+$is_logged_in = isset($_SESSION['Nom_users']);
 $userRole = strtolower($_SESSION['role'] ?? 'client');
-
-$isAdmin = ($userRole === 'admin');
-
+$is_admin = ($userRole === 'admin');
+$current_page = basename($_SERVER['SCRIPT_NAME'], '.php');
+$activePage = $activePage ?? $current_page;
 ?>
 
-
-
-<header>
-
-    <nav>
-
-        <span class="logo">SAFARI-RDC+</span>
-
-
-
-        <ul class="list">
-
-
-
-            <!--  NON CONNECTÉ : INDEX -->
-
-            <?php if (!$isLoggedIn): ?>
-
-
-
-                <li><a href="<?= $siteBase ?>/index.php">Accueil</a></li>
-
-                <li><a href="<?= $siteBase ?>/a pros pos.php">À propos</a></li>
-
-                <li><a href="<?= $siteBase ?>/contact.php">Contact</a></li>
-
-
-
-                <li><a href="<?= $siteBase ?>/connexion.php">Connexion</a></li>
-
-                <li><a href="<?= $siteBase ?>/inscription.php" class="nav-cta">Inscription</a></li>
-
-
+<header class="site-header">
+    <div class="header-top">
+        <a href="<?= $siteBase ?>/acceuil.php" class="logo" aria-label="Travelia - Accueil"><?= htmlspecialchars($site_title) ?></a>
+        <div class="header-actions">
+            <?php if ($is_logged_in): ?>
+                <a href="<?= $siteBase ?>/Voyage_Local.php" class="btn btn-book">Voyage Local</a>
+                <a href="<?= $siteBase ?>/Voyage_en_afrique.php" class="btn btn-book">Voyage en Afrique</a>
+                <a href="<?= $siteBase ?>/logout.php" class="btn btn-logout">Déconnexion</a>
+                <span class="welcome-message">Bienvenue, <?= htmlspecialchars($_SESSION['Nom_users']) ?>!</span>
 
             <?php else: ?>
-
-
-
-                <!--  CONNECTÉ : ACCUEIL DASHBOARD USER -->
-
-                <li><a href="<?= $siteBase ?>/acceuil.php">Accueil</a></li>
-
-
-
-                <li><a href="<?= $siteBase ?>/a pros pos.php">À propos</a></li>
-
-                <li><a href="<?= $siteBase ?>/contact.php">Contact</a></li>
-
-
-
-                <li><a href="<?= $siteBase ?>/destination.php">Destinations</a></li>
-
-
-
-                <li><a href="<?= $siteBase ?>/reservations.php">Réservations</a></li>
-
-
-
-                <!-- ADMIN / CLIENT -->
-
-                <li>
-
-                    <a href="<?= $isAdmin
-
-                        ? $siteBase . '/ADMIN/dashboardAdmin.php'
-
-                        : $siteBase . '/dashboard.php' ?>">
-
-                        Tableau de bord
-
-                    </a>
-
-                </li>
-
-                <li><a href="#" id="logoutBtn" class="nav-cta">Déconnexion</a></li>
-
-
-                <?php if ($isLoggedIn): ?>
-
-                <div id="logoutModal" class="logout-modal">
-
-                    <div class="logout-box">
-
-                        <div class="logout-icon">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </div>
-
-                        <h2>Déconnexion</h2>
-
-                        <p>
-                            Êtes-vous sûr de vouloir vous déconnecter de votre compte Travelia ?
-                        </p>
-
-                        <div class="logout-buttons">
-
-                            <button id="cancelLogout">
-                                Annuler
-                            </button>
-
-                            <a href="<?= $siteBase ?>/logout.php" id="confirmLogout">
-                                Se déconnecter
-                            </a>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <link rel="stylesheet" href="<?= $siteBase ?>/CSS/logout.css">
-
-                <script src="<?= $siteBase ?>/JS/logout.js"></script>
-
+                <a href="<?= $siteBase ?>/connexion.php" class="btn btn-login">Connexion</a>
+                <a href="<?= $siteBase ?>/inscription.php" class="btn btn-signup">Inscription</a>
             <?php endif; ?>
-        <?php endif; ?>
+        </div>
+    </div>
 
-
-
+    <nav class="header-nav" aria-label="Navigation principale Travelia">
+        <ul class="nav-list">
+            <?php if ($is_logged_in): ?>
+                <li class="nav-item">
+                    <a href="<?= $siteBase ?>/acceuil.php" class="nav-link<?= $activePage === 'acceuil' ? ' active' : '' ?>">Accueil</a>
+                </li>
+                <li class="nav-item">
+                    <a href="<?= $siteBase ?>/destination.php" class="nav-link<?= $activePage === 'destination' ? ' active' : '' ?>">Destination</a>
+                </li>
+                <li class="nav-item">
+                    <a href="<?= $siteBase ?>/reservations.php" class="nav-link<?= $activePage === 'reservations' ? ' active' : '' ?>">Réservations</a>
+                </li>
+                <li class="nav-item">
+                    <a href="<?= $is_admin ? $siteBase . '/ADMIN/dashboardAdmin.php' : $siteBase . '/dashboard.php' ?>" class="nav-link<?= $activePage === 'dashboard' ? ' active' : '' ?>">Tableau de bord</a>
+                </li>
+                <li class="nav-item">
+                    <a href="<?= $siteBase ?>/contact.php" class="nav-link<?= $activePage === 'contact' ? ' active' : '' ?>">Contact</a>
+                </li>
+            <?php else: ?>
+                <li class="nav-item">
+                    <a href="<?= $siteBase ?>/index.php" class="nav-link<?= $activePage === 'index' ? ' active' : '' ?>">Accueil</a>
+                </li>
+                <li class="nav-item">
+                    <a href="<?= $siteBase ?>/destination.php" class="nav-link<?= $activePage === 'destination' ? ' active' : '' ?>">Destinations</a>
+                </li>
+                <li class="nav-item">
+                    <a href="<?= $siteBase ?>/a pros pos.php" class="nav-link<?= $activePage === 'a pros pos' ? ' active' : '' ?>">À propos</a>
+                </li>
+                <li class="nav-item">
+                    <a href="<?= $siteBase ?>/contact.php" class="nav-link<?= $activePage === 'contact' ? ' active' : '' ?>">Contact</a>
+                </li>
+            <?php endif; ?>
         </ul>
-
     </nav>
-
 </header>

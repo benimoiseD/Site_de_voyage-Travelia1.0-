@@ -30,19 +30,21 @@ function secure_session_start(): void
     }
 }
 
-if (!function_exists('dashboardInitials')) {
-    function dashboardInitials($name) {
-        $words = explode(' ', trim($name));
-        $initials = '';
+/**
+ * Retourne les initiales d'un nom.
+ */
+function dashboardInitials(string $name): string
+{
+    $words = preg_split('/\s+/', trim($name));
+    $initials = '';
 
-        foreach ($words as $word) {
-            if (isset($word[0]) && strlen($initials) < 2) {
-                $initials .= strtoupper($word[0]);
-            }
+    foreach ($words as $word) {
+        if (isset($word[0]) && mb_strlen($initials) < 2) {
+            $initials .= mb_strtoupper(mb_substr($word, 0, 1));
         }
-
-        return $initials;
     }
+
+    return $initials;
 }
 
 /**
@@ -160,6 +162,33 @@ function validate_length(string $input, int $min, int $max): bool
 }
 
 /**
+ * Valide qu'une valeur fait partie d'une liste autorisée
+ */
+function validate_enum(string $input, array $allowed): bool
+{
+    return in_array($input, $allowed, true);
+}
+
+/**
+ * Récupère l'email d'un utilisateur connecté via son ID
+ */
+function get_user_email_by_id(mysqli $conn, int $userId): string
+{
+    $stmt = $conn->prepare('SELECT Email FROM users WHERE Id = ?');
+    if (!$stmt) {
+        return '';
+    }
+
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $stmt->bind_result($email);
+    $stmt->fetch();
+    $stmt->close();
+
+    return $email ?: '';
+}
+
+/**
  * Valide un mot de passe (minimum 8 caractères, 1 majuscule, 1 minuscule, 1 chiffre)
  */
 function validate_password(string $password): bool
@@ -188,6 +217,40 @@ function validate_name(string $name): bool
 }
 
 /**
+ * Retourne un message d'erreur générique pour les échecs SQL.
+ */
+function sql_error_message(string $action = 'exécuter la requête'): string
+{
+    return 'Erreur interne de base de données : impossible de ' . $action . '.';
+}
+
+/**
+ * Retourne un message lisible pour un code d'erreur d'upload.
+ */
+function upload_error_message(int $errorCode): string
+{
+    switch ($errorCode) {
+        case UPLOAD_ERR_OK:
+            return 'Aucune erreur de téléchargement.';
+        case UPLOAD_ERR_INI_SIZE:
+        case UPLOAD_ERR_FORM_SIZE:
+            return 'La photo doit faire moins de 2 Mo.';
+        case UPLOAD_ERR_PARTIAL:
+            return 'Le fichier a été partiellement téléchargé. Veuillez réessayer.';
+        case UPLOAD_ERR_NO_FILE:
+            return 'Aucun fichier n’a été téléchargé.';
+        case UPLOAD_ERR_NO_TMP_DIR:
+            return 'Dossier temporaire manquant sur le serveur.';
+        case UPLOAD_ERR_CANT_WRITE:
+            return 'Impossible d’écrire le fichier sur le serveur.';
+        case UPLOAD_ERR_EXTENSION:
+            return 'Une extension du serveur a empêché le téléchargement.';
+        default:
+            return 'Erreur lors du téléversement du fichier.';
+    }
+}
+
+/**
  * Valide un numéro de téléphone
  */
 function validate_phone(string $phone): bool
@@ -201,121 +264,164 @@ function validate_phone(string $phone): bool
 
 /**
  * Vérifie si l'utilisateur peut tenter de se connecter
+ * @param mysqli $conn Connexion MySQLi
  * @param string $email Email de l'utilisateur
  * @param int $maxAttempts Nombre maximum de tentatives
  * @param int $windowSeconds Fenêtre de temps en secondes
  * @return bool true si autorisé, false si bloqué
  */
-function can_attempt_login(string $email, int $maxAttempts = 5, int $windowSeconds = 900): bool
+function can_attempt_login(mysqli $conn, string $email, int $maxAttempts = 5, int $windowSeconds = 900): bool
 {
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-        session_start();
+    $email = mb_strtolower(trim($email));
+    if ($email === '') {
+        return false;
     }
 
-    $key = 'login_attempts_' . md5($email);
-    $now = time();
-
-    if (!isset($_SESSION[$key])) {
+    $stmt = $conn->prepare('SELECT attempts, window_start FROM login_attempts WHERE email = ?');
+    if (!$stmt) {
         return true;
     }
 
-    $attempts = $_SESSION[$key];
-    $windowStart = $attempts['window_start'] ?? $now;
-    $count = $attempts['count'] ?? 0;
+    $stmt->bind_param('s', $email);
+    $stmt->execute();
+    $stmt->bind_result($attempts, $windowStart);
+    $rowFound = $stmt->fetch();
+    $stmt->close();
 
-    // Réinitialiser si la fenêtre est expirée
-    if ($now - $windowStart > $windowSeconds) {
-        unset($_SESSION[$key]);
+    if (!$rowFound) {
         return true;
     }
 
-    // Vérifier si le nombre maximum est atteint
-    return $count < $maxAttempts;
+    $attempts = (int)$attempts;
+    $windowStart = (int)$windowStart;
+    if (time() - $windowStart > $windowSeconds) {
+        return true;
+    }
+
+    return $attempts < $maxAttempts;
 }
 
 /**
  * Enregistre une tentative de connexion échouée
+ * @param mysqli $conn Connexion MySQLi
  * @param string $email Email de l'utilisateur
  * @param int $windowSeconds Fenêtre de temps en secondes
  * @return int Nombre de tentatives restantes
  */
-function record_failed_login_attempt(string $email, int $windowSeconds = 900): int
+function record_failed_login_attempt(mysqli $conn, string $email, int $windowSeconds = 900): int
 {
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-        session_start();
+    $email = mb_strtolower(trim($email));
+    if ($email === '') {
+        return 0;
     }
 
-    $key = 'login_attempts_' . md5($email);
     $now = time();
-
-    if (!isset($_SESSION[$key])) {
-        $_SESSION[$key] = [
-            'window_start' => $now,
-            'count' => 1
-        ];
-        return 4; // 5 - 1
+    $stmt = $conn->prepare('SELECT attempts, window_start FROM login_attempts WHERE email = ?');
+    if (!$stmt) {
+        return 0;
     }
 
-    $attempts = $_SESSION[$key];
-    $windowStart = $attempts['window_start'] ?? $now;
-    $count = $attempts['count'] ?? 0;
+    $stmt->bind_param('s', $email);
+    $stmt->execute();
+    $stmt->bind_result($attempts, $windowStart);
+    $rowFound = $stmt->fetch();
+    $stmt->close();
 
-    // Réinitialiser si la fenêtre est expirée
+    if (!$rowFound) {
+        $attempts = 1;
+        $windowStart = $now;
+        $insert = $conn->prepare('INSERT INTO login_attempts (email, attempts, window_start, last_attempt) VALUES (?, ?, ?, NOW())');
+        if ($insert) {
+            $insert->bind_param('sii', $email, $attempts, $windowStart);
+            $insert->execute();
+            $insert->close();
+        }
+        return max(0, 5 - $attempts);
+    }
+
+    $attempts = (int)$attempts;
+    $windowStart = (int)$windowStart;
+
     if ($now - $windowStart > $windowSeconds) {
-        $_SESSION[$key] = [
-            'window_start' => $now,
-            'count' => 1
-        ];
-        return 4;
+        $attempts = 1;
+        $windowStart = $now;
+        $update = $conn->prepare('UPDATE login_attempts SET attempts = ?, window_start = ?, last_attempt = NOW() WHERE email = ?');
+        if ($update) {
+            $update->bind_param('iis', $attempts, $windowStart, $email);
+            $update->execute();
+            $update->close();
+        }
+        return max(0, 5 - $attempts);
     }
 
-    // Incrémenter le compteur
-    $_SESSION[$key]['count'] = $count + 1;
-    return max(0, 5 - ($count + 1));
+    $attempts++;
+    $update = $conn->prepare('UPDATE login_attempts SET attempts = ?, last_attempt = NOW() WHERE email = ?');
+    if ($update) {
+        $update->bind_param('is', $attempts, $email);
+        $update->execute();
+        $update->close();
+    }
+
+    return max(0, 5 - $attempts);
 }
 
 /**
  * Réinitialise les tentatives de connexion après une connexion réussie
+ * @param mysqli $conn Connexion MySQLi
  * @param string $email Email de l'utilisateur
  */
-function reset_login_attempts(string $email): void
+function reset_login_attempts(mysqli $conn, string $email): void
 {
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-        session_start();
+    $email = mb_strtolower(trim($email));
+    if ($email === '') {
+        return;
     }
 
-    $key = 'login_attempts_' . md5($email);
-    unset($_SESSION[$key]);
+    $stmt = $conn->prepare('DELETE FROM login_attempts WHERE email = ?');
+    if ($stmt) {
+        $stmt->bind_param('s', $email);
+        $stmt->execute();
+        $stmt->close();
+    }
 }
 
 /**
  * Obtient le temps d'attente restant avant la prochaine tentative
+ * @param mysqli $conn Connexion MySQLi
  * @param string $email Email de l'utilisateur
  * @param int $windowSeconds Fenêtre de temps en secondes
  * @return int Temps d'attente en secondes (0 si pas bloqué)
  */
-function get_login_wait_time(string $email, int $windowSeconds = 900): int
+function get_login_wait_time(mysqli $conn, string $email, int $windowSeconds = 900): int
 {
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-        session_start();
-    }
-
-    $key = 'login_attempts_' . md5($email);
-
-    if (!isset($_SESSION[$key])) {
+    $email = mb_strtolower(trim($email));
+    if ($email === '') {
         return 0;
     }
 
-    $attempts = $_SESSION[$key];
-    $windowStart = $attempts['window_start'] ?? time();
-    $count = $attempts['count'] ?? 0;
-
-    if ($count < 5) {
+    $stmt = $conn->prepare('SELECT attempts, window_start FROM login_attempts WHERE email = ?');
+    if (!$stmt) {
         return 0;
     }
 
-    $now = time();
-    $elapsed = $now - $windowStart;
+    $stmt->bind_param('s', $email);
+    $stmt->execute();
+    $stmt->bind_result($attempts, $windowStart);
+    $rowFound = $stmt->fetch();
+    $stmt->close();
+
+    if (!$rowFound) {
+        return 0;
+    }
+
+    $attempts = (int)$attempts;
+    $windowStart = (int)$windowStart;
+
+    if ($attempts < 5) {
+        return 0;
+    }
+
+    $elapsed = time() - $windowStart;
     $remaining = $windowSeconds - $elapsed;
 
     return max(0, $remaining);

@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/INCLUDE/fonction.php';
 secure_session_start();
-require_once __DIR__ . '/BASE_DES_DONNEES/db.php';
+require_once __DIR__ . '/INCLUDE/db.php';
+
+$conn = get_db_connection();
 
 if (!isset($_SESSION['Id'])) {
     header('Location: connexion.php');
@@ -9,7 +11,7 @@ if (!isset($_SESSION['Id'])) {
 }
 
 $pageTitle = "SAFARI-RDC+ | Mes réservations";
-$pageStyles = ['CSS/reservations.css?v=1.1'];
+$pageStyles = ['CSS/reservations.css?v=1.2', 'CSS/header.css?v=1.2', 'CSS/animations.css?v=1.5'];
 
 // Vérifier si on veut réserver une destination spécifique
 $destinationToBook = null;
@@ -29,7 +31,7 @@ if ($bookingMode) {
     }
 }
 
-$stmt = $conn->prepare('SELECT destination, date_depart, guests, type_sejour, created_at FROM reservations WHERE user_id = ? ORDER BY created_at DESC');
+$stmt = $conn->prepare('SELECT destination, date_depart, guests, type_sejour, notes, created_at FROM reservations WHERE user_id = ? ORDER BY created_at DESC');
 $userReservations = [];
 if ($stmt) {
     $stmt->bind_param('i', $_SESSION['Id']);
@@ -51,8 +53,8 @@ $csrfToken = csrf_token();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Mes réservations SAFARI-RDC+">
     <title><?= htmlspecialchars($pageTitle) ?></title>
-    <link rel="stylesheet" href="CSS/header.css?v=1.5">
-    <link rel="stylesheet" href="CSS/animations.css?v=1.0">
+    <link rel="stylesheet" href="CSS/header.css?v=1.1">
+    <link rel="stylesheet" href="CSS/animations.css?v=1.5">
     <?php foreach ($pageStyles as $style): ?>
         <link rel="stylesheet" href="<?= htmlspecialchars($style) ?>">
     <?php endforeach; ?>
@@ -65,7 +67,7 @@ $csrfToken = csrf_token();
     <div class="loader-text">Traitement en cours...</div>
 </div>
 
-<?php include 'INCLUDE/header.php'; ?>
+<?php require_once __DIR__ . '/INCLUDE/header.php'; ?>
 
 <main class="reservations page-transition">
     <section class="reservations-hero">
@@ -95,8 +97,7 @@ $csrfToken = csrf_token();
                 </div>
                 <form id="bookingForm" class="booking-form">
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
-                    <input type="hidden" name="destination" value="<?= htmlspecialchars($destinationToBook['nom']) ?>">
-                    <input type="hidden" name="email" value="<?= htmlspecialchars($_SESSION['email'] ?? '') ?>">
+                    <input type="hidden" name="destination_id" value="<?= (int)$destinationToBook['id'] ?>">
                     
                     <div class="form-row">
                         <div class="form-group">
@@ -220,6 +221,9 @@ $csrfToken = csrf_token();
                                         <dd><?= htmlspecialchars((string) ($reservation['guests'] ?? '—')) ?></dd>
                                     </div>
                                 </dl>
+                                <?php if (!empty($reservation['notes'])): ?>
+                                    <p class="reservation-notes"><?= htmlspecialchars($reservation['notes']) ?></p>
+                                <?php endif; ?>
                             </li>
                         <?php endforeach; ?>
                     </ul>
@@ -239,7 +243,7 @@ $csrfToken = csrf_token();
     </div>
 </main>
 
-<?php include 'INCLUDE/footer.php'; ?>
+<?php require_once __DIR__ . '/INCLUDE/footer.php'; ?>
 
 </body>
 </html>

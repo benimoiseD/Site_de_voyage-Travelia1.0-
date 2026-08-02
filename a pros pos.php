@@ -6,14 +6,16 @@
     <meta name="Description" content="Découvrez qui nous sommes, notre mission et notre équipe.">
     <title>SAFARI-RDC+ | À propos</title>
     <link rel="stylesheet" href="CSS/apropos.css">
+    <link rel="stylesheet" href="CSS/header.css?v=1.1">
     <link rel="stylesheet" href="CSS/animations.css?v=1.5">
 </head>
 <body>
 
 <?php
-$pageTitle = "SAFARI-RDC+ | Accueil";
-include 'include/header.php';
+$pageTitle = "SAFARI-RDC+ | À propos";
+require_once __DIR__ . '/INCLUDE/header.php';
 ?>
+
 
     <section>
         <div class="pt-principal">
@@ -45,7 +47,8 @@ include 'include/header.php';
 
 
     <script src="JS/a pros pos.js"></script>
-    <?php include 'include/footer.php'; ?>
+    <?php require_once __DIR__ . '/INCLUDE/footer.php'; ?>
+
 
 
 </body>

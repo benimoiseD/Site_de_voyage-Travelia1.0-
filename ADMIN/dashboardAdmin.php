@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/../INCLUDE/fonction.php';
+require_once __DIR__ . '/../INCLUDE/db.php';
 secure_session_start();
-require_once __DIR__ . '/../Base_des_donnees/db.php';
+
+$conn = get_db_connection();
 
 if (!isset($_SESSION['Id']) || ($_SESSION['role'] ?? 'client') !== 'admin') {
     header('Location: ../connexion.php');
@@ -16,50 +18,85 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Jeton CSRF invalide.';
     } else {
         if (isset($_POST['add_destination'])) {
-            $nom = trim($_POST['nom'] ?? '');
-            $pays = trim($_POST['pays'] ?? '');
-            $description = trim($_POST['description'] ?? '');
+            $nom = sanitize_string($_POST['nom'] ?? '');
+            $pays = sanitize_string($_POST['pays'] ?? '');
+            $description = sanitize_string($_POST['description'] ?? '');
             $prix = (float)($_POST['prix'] ?? 0);
             $image = trim($_POST['image'] ?? '');
 
             if ($nom === '' || $pays === '' || $description === '') {
                 $error = 'Tous les champs obligatoires doivent être renseignés.';
+            } elseif (mb_strlen($nom) < 2 || mb_strlen($nom) > 100) {
+                $error = 'Le nom doit contenir entre 2 et 100 caractères.';
+            } elseif (mb_strlen($pays) < 2 || mb_strlen($pays) > 100) {
+                $error = 'Le pays doit contenir entre 2 et 100 caractères.';
+            } elseif ($prix <= 0 || $prix > 100000) {
+                $error = 'Le prix doit être compris entre 0,01 et 100000.';
+            } elseif (mb_strlen($description) < 20 || mb_strlen($description) > 1000) {
+                $error = 'La description doit contenir entre 20 et 1000 caractères.';
+            } elseif ($image !== '' && !preg_match('/^[A-Za-z0-9_\/\.\-]+\.(jpe?g|png|webp)$/i', $image)) {
+                $error = 'Le chemin de l\'image doit être valide et se terminer par .jpg, .jpeg, .png ou .webp.';
             } else {
                 $stmt = $conn->prepare('INSERT INTO destinations (nom, pays, description, prix, image, created_at) VALUES (?, ?, ?, ?, ?, NOW())');
                 if ($stmt) {
-                    $stmt->bind_param('sssis', $nom, $pays, $description, $prix, $image);
+                    $stmt->bind_param('sssds', $nom, $pays, $description, $prix, $image);
                     if ($stmt->execute()) {
                         $success = 'Destination ajoutée avec succès.';
                     } else {
-                        $error = 'Impossible d’ajouter la destination.';
+                        $error = 'Impossible d’ajouter la destination. Vérifiez les données saisies.';
                     }
                 } else {
-                    $error = 'Erreur interne.';
+                    $error = 'Erreur interne lors de la préparation de la création de destination.';
                 }
             }
         }
 
         if (isset($_POST['update_destination'])) {
             $id = (int)($_POST['destination_id'] ?? 0);
-            $nom = trim($_POST['nom'] ?? '');
-            $pays = trim($_POST['pays'] ?? '');
-            $description = trim($_POST['description'] ?? '');
+            $nom = sanitize_string($_POST['nom'] ?? '');
+            $pays = sanitize_string($_POST['pays'] ?? '');
+            $description = sanitize_string($_POST['description'] ?? '');
             $prix = (float)($_POST['prix'] ?? 0);
             $image = trim($_POST['image'] ?? '');
 
-            if ($id <= 0 || $nom === '' || $pays === '' || $description === '') {
+            if (!validate_positive_int($id) || $nom === '' || $pays === '' || $description === '') {
                 $error = 'Les informations de la destination sont incomplètes.';
+            } elseif (mb_strlen($nom) < 2 || mb_strlen($nom) > 100) {
+                $error = 'Le nom doit contenir entre 2 et 100 caractères.';
+            } elseif (mb_strlen($pays) < 2 || mb_strlen($pays) > 100) {
+                $error = 'Le pays doit contenir entre 2 et 100 caractères.';
+            } elseif ($prix <= 0 || $prix > 100000) {
+                $error = 'Le prix doit être compris entre 0,01 et 100000.';
+            } elseif (mb_strlen($description) < 20 || mb_strlen($description) > 1000) {
+                $error = 'La description doit contenir entre 20 et 1000 caractères.';
+            } elseif ($image !== '' && !preg_match('/^[A-Za-z0-9_\/\.\-]+\.(jpe?g|png|webp)$/i', $image)) {
+                $error = 'Le chemin de l\'image doit être valide et se terminer par .jpg, .jpeg, .png ou .webp.';
             } else {
+                $destinationCheck = $conn->prepare('SELECT id FROM destinations WHERE id = ?');
+                if (!$destinationCheck) {
+                    $error = 'Erreur interne lors de la vérification de la destination.';
+                } else {
+                    $destinationCheck->bind_param('i', $id);
+                    $destinationCheck->execute();
+                    $destinationCheck->store_result();
+                    if ($destinationCheck->num_rows !== 1) {
+                        $error = 'Destination introuvable.';
+                    }
+                    $destinationCheck->close();
+                }
+            }
+
+            if ($error === '') {
                 $stmt = $conn->prepare('UPDATE destinations SET nom = ?, pays = ?, description = ?, prix = ?, image = ? WHERE id = ?');
                 if ($stmt) {
-                    $stmt->bind_param('ssdsii', $nom, $pays, $description, $prix, $image, $id);
+                    $stmt->bind_param('sssdsi', $nom, $pays, $description, $prix, $image, $id);
                     if ($stmt->execute()) {
                         $success = 'Destination modifiée avec succès.';
                     } else {
-                        $error = 'Impossible de modifier la destination.';
+                        $error = 'Impossible de modifier la destination. Vérifiez les données saisies.';
                     }
                 } else {
-                    $error = 'Erreur interne.';
+                    $error = 'Erreur interne lors de la préparation de la mise à jour de destination.';
                 }
             }
         }
@@ -233,44 +270,95 @@ $userInitials = dashboardInitials($_SESSION['Nom_users']);
 
     <section class="section-card" id="destinations">
         <h2>Ajouter une destination</h2>
-        <form method="POST">
+        <form method="POST" id="adminDestinationForm" novalidate>
             <?= csrf_input_field() ?>
+            <div id="adminFormMessage" class="alert alert-info" style="display:none;" aria-live="polite"></div>
             <div class="form-grid">
-                <label>Nom<input type="text" name="nom" required></label>
-                <label>Pays<input type="text" name="pays" required></label>
-                <label>Prix<input type="number" step="0.01" name="prix" value="0" required></label>
-                <label>Image<input type="text" name="image" placeholder="IMG1/B.jpg"></label>
+                <label>Nom<input type="text" name="nom" required minlength="2" maxlength="100" pattern="[A-Za-zÀ-ÖØ-öø-ÿ0-9'\-\.\s]+" title="Nom valide, 2 à 100 caractères."></label>
+                <label>Pays<input type="text" name="pays" required minlength="2" maxlength="100" pattern="[A-Za-zÀ-ÖØ-öø-ÿ0-9'\-\.\s]+" title="Pays valide, 2 à 100 caractères."></label>
+                <label>Prix<input type="number" step="0.01" name="prix" value="0.00" required min="0.01" max="100000"></label>
+                <label>Image<input type="text" name="image" placeholder="IMG1/B.jpg" pattern="[A-Za-z0-9_\/\.\-]+\.(jpe?g|png|webp)$" title="Chemin d'image valide se terminant par .jpg, .jpeg, .png ou .webp"></label>
             </div>
-            <label style="margin-top:12px;">Description<textarea name="description" required></textarea></label>
+            <label style="margin-top:12px;">Description<textarea name="description" required minlength="20" maxlength="1000"></textarea></label>
             <button type="submit" name="add_destination" style="margin-top:12px;">Ajouter</button>
         </form>
     </section>
+
+    <script>
+        (function () {
+            const form = document.getElementById('adminDestinationForm');
+            const messageBox = document.getElementById('adminFormMessage');
+
+            if (!form || !messageBox) {
+                return;
+            }
+
+            form.addEventListener('submit', function (event) {
+                const nom = form.querySelector('[name=nom]').value.trim();
+                const pays = form.querySelector('[name=pays]').value.trim();
+                const prix = parseFloat(form.querySelector('[name=prix]').value);
+                const description = form.querySelector('[name=description]').value.trim();
+                const image = form.querySelector('[name=image]').value.trim();
+                const errors = [];
+
+                if (nom.length < 2 || nom.length > 100) {
+                    errors.push('Le nom doit contenir entre 2 et 100 caractères.');
+                }
+                if (pays.length < 2 || pays.length > 100) {
+                    errors.push('Le pays doit contenir entre 2 et 100 caractères.');
+                }
+                if (Number.isNaN(prix) || prix <= 0 || prix > 100000) {
+                    errors.push('Le prix doit être compris entre 0,01 et 100000.');
+                }
+                if (description.length < 20 || description.length > 1000) {
+                    errors.push('La description doit contenir entre 20 et 1000 caractères.');
+                }
+                if (image && !/^[A-Za-z0-9_\/\.\-]+\.(jpe?g|png|webp)$/i.test(image)) {
+                    errors.push('Le chemin de l\'image doit être valide et se terminer par .jpg, .jpeg, .png ou .webp.');
+                }
+
+                if (errors.length > 0) {
+                    event.preventDefault();
+                    messageBox.textContent = errors.join(' ');
+                    messageBox.className = 'alert alert-error';
+                    messageBox.style.display = 'block';
+                    messageBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        })();
+    </script>
 
     <section class="section-card">
         <h2>Destinations disponibles</h2>
         <div class="table-wrap">
             <table>
                 <thead>
-                    <tr><th>Nom</th><th>Pays</th><th>Prix</th><th>Description</th><th>Actions</th></tr>
+                    <tr><th>Nom</th><th>Pays</th><th>Prix</th><th>Description</th><th>Image</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                     <?php foreach ($destinations as $destination): ?>
                         <tr>
-                            <td><?= htmlspecialchars($destination['nom']) ?></td>
-                            <td><?= htmlspecialchars($destination['pays']) ?></td>
-                            <td><?= htmlspecialchars(number_format((float)$destination['prix'], 2, ',', ' ')) ?> $</td>
-                            <td><?= htmlspecialchars($destination['description']) ?></td>
+                            <td>
+                                <input form="edit-destination-<?= (int)$destination['id'] ?>" type="text" name="nom" value="<?= htmlspecialchars($destination['nom'], ENT_QUOTES) ?>" required minlength="2" maxlength="100">
+                            </td>
+                            <td>
+                                <input form="edit-destination-<?= (int)$destination['id'] ?>" type="text" name="pays" value="<?= htmlspecialchars($destination['pays'], ENT_QUOTES) ?>" required minlength="2" maxlength="100">
+                            </td>
+                            <td>
+                                <input form="edit-destination-<?= (int)$destination['id'] ?>" type="number" step="0.01" name="prix" value="<?= htmlspecialchars((string)$destination['prix'], ENT_QUOTES) ?>" required min="0.01" max="100000">
+                            </td>
+                            <td>
+                                <textarea form="edit-destination-<?= (int)$destination['id'] ?>" name="description" required minlength="20" maxlength="1000"><?= htmlspecialchars($destination['description'], ENT_QUOTES) ?></textarea>
+                            </td>
+                            <td>
+                                <input form="edit-destination-<?= (int)$destination['id'] ?>" type="text" name="image" value="<?= htmlspecialchars($destination['image'] ?? '', ENT_QUOTES) ?>" placeholder="IMG1/B.jpg" pattern="[A-Za-z0-9_\/\.\-]+\.(jpe?g|png|webp)$" title="Chemin d'image valide se terminant par .jpg, .jpeg, .png ou .webp">
+                            </td>
                             <td>
                                 <div class="actions">
-                                    <form method="POST" style="display:inline;">
+                                    <form id="edit-destination-<?= (int)$destination['id'] ?>" method="POST" style="display:inline;">
                                         <?= csrf_input_field() ?>
                                         <input type="hidden" name="destination_id" value="<?= (int)$destination['id'] ?>">
-                                        <input type="hidden" name="nom" value="<?= htmlspecialchars($destination['nom'], ENT_QUOTES) ?>">
-                                        <input type="hidden" name="pays" value="<?= htmlspecialchars($destination['pays'], ENT_QUOTES) ?>">
-                                        <input type="hidden" name="description" value="<?= htmlspecialchars($destination['description'], ENT_QUOTES) ?>">
-                                        <input type="hidden" name="prix" value="<?= htmlspecialchars((string)$destination['prix'], ENT_QUOTES) ?>">
-                                        <input type="hidden" name="image" value="<?= htmlspecialchars($destination['image'] ?? '', ENT_QUOTES) ?>">
-                                        <button type="submit" name="update_destination" class="small">Modifier</button>
+                                        <button type="submit" name="update_destination" class="small">Enregistrer</button>
                                     </form>
                                     <form method="POST" style="display:inline;">
                                         <?= csrf_input_field() ?>

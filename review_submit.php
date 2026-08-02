@@ -2,7 +2,9 @@
 require_once __DIR__ . '/INCLUDE/fonction.php';
 secure_session_start();
 header('Content-Type: application/json');
-require_once __DIR__ . '/BASE_DES_DONNEES/db.php';
+require_once __DIR__ . '/INCLUDE/db.php';
+
+$conn = get_db_connection();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -23,11 +25,13 @@ if (!validate_csrf_token((string)$csrfToken)) {
     exit;
 }
 
+header('Content-Type: application/json; charset=utf-8');
+
 $destinationId = $_POST['destination_id'] ?? '';
 $rating = $_POST['rating'] ?? '';
-$comment = sanitize_string($_POST['comment'] ?? '');
+$comment = trim((string)($_POST['comment'] ?? ''));
 
-if (empty($destinationId) || empty($rating) || empty($comment)) {
+if (empty($destinationId) || empty($rating) || $comment === '') {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Tous les champs sont obligatoires.']);
     exit;
@@ -38,6 +42,23 @@ if (!validate_positive_int($destinationId)) {
     echo json_encode(['success' => false, 'message' => 'ID de destination invalide.']);
     exit;
 }
+
+$destinationId = (int)$destinationId;
+$destinationExistsStmt = $conn->prepare('SELECT id FROM destinations WHERE id = ?');
+if (!$destinationExistsStmt) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Erreur interne de base de données.']);
+    exit;
+}
+$destinationExistsStmt->bind_param('i', $destinationId);
+$destinationExistsStmt->execute();
+$destinationExistsStmt->store_result();
+if ($destinationExistsStmt->num_rows !== 1) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Destination introuvable.']);
+    exit;
+}
+$destinationExistsStmt->close();
 
 if (!validate_positive_int($rating) || $rating < 1 || $rating > 5) {
     http_response_code(400);
@@ -77,7 +98,31 @@ if (!$insert) {
 $insert->bind_param('iiis', $userId, $destinationId, $rating, $comment);
 
 if ($insert->execute()) {
-    echo json_encode(['success' => true, 'message' => 'Avis enregistré avec succès.']);
+    $insert->close();
+
+    $statsStmt = $conn->prepare('SELECT COUNT(*) AS total_reviews, AVG(rating) AS average_rating FROM reviews WHERE destination_id = ?');
+    $totalReviews = 0;
+    $averageRating = 0;
+    if ($statsStmt) {
+        $statsStmt->bind_param('i', $destinationId);
+        $statsStmt->execute();
+        $statsStmt->bind_result($totalReviews, $averageRating);
+        $statsStmt->fetch();
+        $statsStmt->close();
+    }
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Avis enregistré avec succès.',
+        'review' => [
+            'rating' => $rating,
+            'comment' => $comment,
+            'created_at' => date('d/m/Y'),
+            'user_name' => $_SESSION['Nom_users'] ?? 'Anonyme'
+        ],
+        'review_count' => (int)$totalReviews,
+        'average_rating' => $averageRating !== null ? round($averageRating, 1) : 0
+    ]);
     exit;
 }
 

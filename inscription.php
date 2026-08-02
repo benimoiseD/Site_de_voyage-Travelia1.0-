@@ -1,46 +1,51 @@
 <?php
 require_once __DIR__ . '/INCLUDE/fonction.php';
 secure_session_start();
-require_once __DIR__ . '/BASE_DES_DONNEES/db.php';
+require_once __DIR__ . '/INCLUDE/db.php';
 
-$erreur = '';
+$conn = get_db_connection();
+$error = '';
 $name = $_POST['name'] ?? '';
 $email = $_POST['email'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
-        $erreur = 'Jeton CSRF invalide.';
+        $error = 'Jeton CSRF invalide.';
     } else {
         $name = sanitize_string($_POST['name'] ?? '');
         $email = sanitize_string($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
         if (empty($name) || empty($email) || empty($password)) {
-            $erreur = 'Tous les champs sont obligatoires.';
+            $error = 'Tous les champs sont obligatoires.';
         } elseif (!validate_name($name)) {
-            $erreur = 'Le nom contient des caractères invalides.';
+            $error = 'Le nom contient des caractères invalides.';
         } elseif (!validate_length($name, 2, 100)) {
-            $erreur = 'Le nom doit contenir entre 2 et 100 caractères.';
+            $error = 'Le nom doit contenir entre 2 et 100 caractères.';
         } elseif (!validate_email($email)) {
-            $erreur = 'Adresse email invalide.';
+            $error = 'Adresse email invalide.';
         } elseif (!validate_password($password)) {
-            $erreur = 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.';
+            $error = 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.';
         } else {
             $stmt = $conn->prepare('SELECT Id FROM users WHERE Email = ?');
 
-            if ($stmt) {
+            if (!$stmt) {
+                $error = sql_error_message('préparer la vérification d’email');
+            } else {
                 $stmt->bind_param('s', $email);
                 $stmt->execute();
                 $stmt->store_result();
 
                 if ($stmt->num_rows > 0) {
-                    $erreur = 'Impossible de créer le compte. Veuillez vérifier vos informations.';
-                } else {
+                $error = 'Impossible de créer le compte. Veuillez vérifier vos informations.';
+            } else {
                     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
                     $role = 'client';
                     $insert = $conn->prepare('INSERT INTO users (Nom_users, Email, MotDePasse, role) VALUES (?, ?, ?, ?)');
 
-                    if ($insert) {
+                    if (!$insert) {
+                        $error = sql_error_message('préparer l’enregistrement du compte');
+                    } else {
                         $insert->bind_param('ssss', $name, $email, $passwordHash, $role);
 
                         if ($insert->execute()) {
@@ -53,13 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                             exit();
                         }
 
-                        $erreur = 'Erreur lors de l\'inscription, veuillez réessayer.';
-                    } else {
-                        $erreur = 'Erreur interne, veuillez réessayer.';
+                        $error = 'Erreur lors de l\'inscription, veuillez réessayer.';
                     }
                 }
-            } else {
-                $erreur = 'Erreur interne, veuillez réessayer.';
             }
         }
     }
@@ -100,9 +101,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                 <button type="button" class="toggle-btn active" data-mode="signup">Inscription</button>
             </div>
             
-            <?php if (!empty($erreur)): ?>
+            <?php if (!empty($error)): ?>
                 <div class="auth-message error">
-                    <?= htmlspecialchars($erreur) ?>
+                    <?= htmlspecialchars($error) ?>
                 </div>
             <?php endif; ?>
 
@@ -127,7 +128,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     
     <script src="JS/inscription_connexion.js?v=2"></script>
 
-    <?php include 'include/footer.php'; ?>
+    <?php require_once __DIR__ . '/INCLUDE/footer.php'; ?>
+
 
 
 </body>

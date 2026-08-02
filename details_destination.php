@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/INCLUDE/fonction.php';
 secure_session_start();
-require_once __DIR__ . '/BASE_DES_DONNEES/db.php';
+require_once __DIR__ . '/INCLUDE/db.php';
+
+$conn = get_db_connection();
 
 $pageTitle = "Travelia | Détails de la destination";
 $pageStyles = ['CSS/destination.css?v=1.0'];
@@ -111,7 +113,7 @@ if ($id > 0) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Détails de la destination Travelia">
     <title><?= htmlspecialchars($pageTitle) ?></title>
-    <link rel="stylesheet" href="CSS/destination.css?v=1.0">
+    <link rel="stylesheet" href="CSS/destination.css?v=1.1">
     <link rel="stylesheet" href="CSS/header.css?v=1.0">
     <link rel="stylesheet" href="CSS/animations.css?v=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -124,7 +126,7 @@ if ($id > 0) {
     <div class="loader-text">Envoi en cours...</div>
 </div>
 
-<?php include 'INCLUDE/header.php'; ?>
+<?php require_once __DIR__ . '/INCLUDE/header.php'; ?>
 
 <?php if ($destination): ?>
     <!-- Hero Section with Carousel -->
@@ -431,8 +433,8 @@ if ($id > 0) {
             <!-- Moyenne des notes -->
             <div class="rating-summary">
                 <div class="rating-average">
-                    <div class="average-score"><?= $averageRating > 0 ? $averageRating : '-' ?></div>
-                    <div class="average-stars">
+                    <div id="averageScore" class="average-score"><?= $averageRating > 0 ? $averageRating : '-' ?></div>
+                    <div id="averageStars" class="average-stars">
                         <?php if ($averageRating > 0): ?>
                             <?php for ($i = 1; $i <= 5; $i++): ?>
                                 <i class="fas fa-star <?= $i <= round($averageRating) ? 'active' : '' ?>"></i>
@@ -441,7 +443,7 @@ if ($id > 0) {
                             <span>Aucun avis pour le moment</span>
                         <?php endif; ?>
                     </div>
-                    <div class="review-count"><?= count($reviews) ?> avis</div>
+                    <div id="reviewCountText" class="review-count"><?= count($reviews) ?> avis</div>
                 </div>
             </div>
 
@@ -481,7 +483,7 @@ if ($id > 0) {
             <?php endif; ?>
 
             <!-- Liste des avis -->
-            <div class="reviews-list">
+            <div id="reviewsList" class="reviews-list">
                 <?php if (!empty($reviews)): ?>
                     <?php foreach ($reviews as $review): ?>
                         <div class="review-card">
@@ -540,41 +542,116 @@ if ($id > 0) {
         }
 
         // Gestion du formulaire d'avis
-        document.getElementById('reviewForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const form = this;
-            const formData = new FormData(form);
-            const submitBtn = form.querySelector('.btn-submit-review');
-            const loaderOverlay = document.getElementById('loaderOverlay');
-            
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Envoi en cours...';
-            loaderOverlay.classList.add('active');
+        const reviewForm = document.getElementById('reviewForm');
+        const reviewCountText = document.getElementById('reviewCountText');
+        const averageScore = document.getElementById('averageScore');
+        const averageStars = document.getElementById('averageStars');
+        const reviewsList = document.getElementById('reviewsList');
 
-            fetch('review_submit.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                loaderOverlay.classList.remove('active');
-                if (data.success) {
-                    alert('Votre avis a été enregistré avec succès !');
-                    location.reload();
-                } else {
-                    alert(data.message || 'Erreur lors de l\'envoi de l\'avis.');
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function renderStars(rating) {
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                html += `<i class="fas fa-star ${i <= rating ? 'active' : ''}"></i>`;
+            }
+            return html;
+        }
+
+        function renderReviewCard(review) {
+            return `
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="review-author">
+                            <i class="fas fa-user-circle"></i>
+                            <span>${escapeHtml(review.user_name)}</span>
+                        </div>
+                        <div class="review-rating">
+                            ${renderStars(review.rating)}
+                        </div>
+                    </div>
+                    <div class="review-content">
+                        <p>${escapeHtml(review.comment).replace(/\n/g, '<br>')}</p>
+                    </div>
+                    <div class="review-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        ${escapeHtml(review.created_at)}
+                    </div>
+                </div>
+            `;
+        }
+
+        if (reviewForm) {
+            reviewForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const form = this;
+                const formData = new FormData(form);
+                const submitBtn = form.querySelector('.btn-submit-review');
+                const loaderOverlay = document.getElementById('loaderOverlay');
+                
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Envoi en cours...';
+                loaderOverlay.classList.add('active');
+
+                fetch('review_submit.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    loaderOverlay.classList.remove('active');
+                    if (data.success) {
+                        if (reviewCountText) {
+                            reviewCountText.textContent = `${data.review_count} avis`;
+                        }
+                        if (averageScore) {
+                            averageScore.textContent = data.average_rating > 0 ? data.average_rating : '-';
+                        }
+                        if (averageStars) {
+                            averageStars.innerHTML = renderStars(Math.round(data.average_rating));
+                        }
+
+                        if (reviewsList) {
+                            const noReviewsElement = reviewsList.querySelector('.no-reviews');
+                            if (noReviewsElement) {
+                                noReviewsElement.remove();
+                            }
+                            const card = document.createElement('div');
+                            card.className = 'review-card';
+                            card.innerHTML = renderReviewCard(data.review);
+                            reviewsList.insertAdjacentHTML('afterbegin', card.innerHTML);
+                        }
+
+                        const formContainer = document.querySelector('.review-form-container');
+                        if (formContainer) {
+                            formContainer.innerHTML = '<div class="review-already-message"><p>Merci ! Votre avis a été enregistré.</p></div>';
+                        }
+
+                        alert('Votre avis a été enregistré avec succès !');
+                    } else {
+                        alert(data.message || 'Erreur lors de l\'envoi de l\'avis.');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Envoyer mon avis';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    loaderOverlay.classList.remove('active');
+                    alert('Erreur lors de l\'envoi de l\'avis.');
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Envoyer mon avis';
-                }
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                loaderOverlay.classList.remove('active');
-                alert('Erreur lors de l\'envoi de l\'avis.');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Envoyer mon avis';
+                });
             });
-        });
+        }
 
         // Gestion de l'affichage des étoiles
         const starLabels = document.querySelectorAll('.star-label');
@@ -679,7 +756,7 @@ if ($id > 0) {
     </section>
 <?php endif; ?>
 
-<?php include 'INCLUDE/footer.php'; ?>
+<?php require_once __DIR__ . '/INCLUDE/footer.php'; ?>
 
 </body>
 </html>

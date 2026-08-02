@@ -7,10 +7,10 @@
                 <p>Explorez la RDC et l'Afrique de l'Est avec Travelia.</p>
             </div>
             <div class="footer-social">
-                <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
-                <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                <a href="https://www.facebook.com/" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://www.instagram.com/" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.linkedin.com/" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                <a href="https://www.youtube.com/" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
             </div>
         </div>
 
@@ -54,8 +54,8 @@
         <div class="footer-bottom-content">
             <p>&copy; 2026 Travelia. Tous droits réservés.</p>
             <div class="footer-bottom-links">
-                <a href="#">Conditions d'utilisation</a>
-                <a href="#">Politique de confidentialité</a>
+                <a href="conditions_utilisation.php">Conditions d'utilisation</a>
+                <a href="politique_confidentialite.php">Politique de confidentialité</a>
             </div>
         </div>
     </div>

@@ -8,14 +8,16 @@
     <meta name="description" content="SAFARI-RDC+ vous aide à découvrir des voyages, safaris et destinations autour de la RDC avant de créer votre compte.">
     <title>SAFARI-RDC+ | Bienvenue</title>
     <link rel="stylesheet" href="CSS/ind.css">
+    <link rel="stylesheet" href="CSS/header.css?v=1.2">
     <link rel="stylesheet" href="CSS/animations.css?v=1.0">
 </head>
 <body>
 
 <?php
 $pageTitle = "SAFARI-RDC+ | Accueil";
-include 'include/header.php';
+require_once __DIR__ . '/INCLUDE/header.php';
 ?>
+
 <?php if(isset($_GET['logout'])): ?>
 
 <div class="logout-success">
@@ -139,7 +141,8 @@ include 'include/header.php';
     </div>
 </section>
 
-<?php include 'include/footer.php'; ?>
+<?php require_once __DIR__ . '/INCLUDE/footer.php'; ?>
+
 
 <script src="JS/index.js"></script>
 
