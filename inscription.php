@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/INCLUDE/fonction.php';
+require_once __DIR__ . '/INCLUDE/pays.php';
 secure_session_start();
 require_once __DIR__ . '/INCLUDE/db.php';
 
@@ -7,6 +8,7 @@ $conn = get_db_connection();
 $error = '';
 $name = $_POST['name'] ?? '';
 $email = $_POST['email'] ?? '';
+$countryResidence = trim((string)($_POST['pays_residence'] ?? ''));
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
@@ -14,9 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     } else {
         $name = sanitize_string($_POST['name'] ?? '');
         $email = sanitize_string($_POST['email'] ?? '');
+        $countryResidence = trim((string)($_POST['pays_residence'] ?? ''));
         $password = $_POST['password'] ?? '';
 
-        if (empty($name) || empty($email) || empty($password)) {
+        if (empty($name) || empty($email) || empty($password) || $countryResidence === '') {
             $error = 'Tous les champs sont obligatoires.';
         } elseif (!validate_name($name)) {
             $error = 'Le nom contient des caractères invalides.';
@@ -24,6 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             $error = 'Le nom doit contenir entre 2 et 100 caractères.';
         } elseif (!validate_email($email)) {
             $error = 'Adresse email invalide.';
+        } elseif (!travelia_is_valid_country($countryResidence)) {
+            $error = 'Veuillez sélectionner un pays de résidence valide.';
         } elseif (!validate_password($password)) {
             $error = 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.';
         } else {
@@ -41,18 +46,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             } else {
                     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
                     $role = 'client';
-                    $insert = $conn->prepare('INSERT INTO users (Nom_users, Email, MotDePasse, role) VALUES (?, ?, ?, ?)');
+                    $insert = $conn->prepare('INSERT INTO users (Nom_users, Email, MotDePasse, role, pays_residence) VALUES (?, ?, ?, ?, ?)');
 
                     if (!$insert) {
                         $error = sql_error_message('préparer l’enregistrement du compte');
                     } else {
-                        $insert->bind_param('ssss', $name, $email, $passwordHash, $role);
+                        $insert->bind_param('sssss', $name, $email, $passwordHash, $role, $countryResidence);
 
                         if ($insert->execute()) {
                             $_SESSION['Id'] = $conn->insert_id;
                             $_SESSION['Nom_users'] = $name;
                             $_SESSION['email'] = $email;
                             $_SESSION['role'] = $role;
+                            $_SESSION['pays_residence'] = $countryResidence;
                             $_SESSION['created_at'] = null;
                             header('Location: acceuil.php');
                             exit();
@@ -75,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Découvrez les meilleures destinations touristiques avec SAFARI-RDC+">
     <title>SAFARI-RDC+</title>
-    <link rel="stylesheet" href="CSS/inscription.css">
+    <link rel="stylesheet" href="CSS/inscription.css?v=1.0">
     <link rel="stylesheet" href="CSS/animations.css?v=1.0">
 </head>
 
@@ -115,6 +121,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                 </label>
                 <label>Email
                     <input type="email" id="email" name="email" required autocomplete="email" placeholder="vous@exemple.com" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
+                </label>
+                <label>Pays de résidence
+                    <select id="pays_residence" name="pays_residence" class="auth-select" required>
+                        <?= travelia_country_options_html($countryResidence) ?>
+                    </select>
                 </label>
                 <label>Mot de passe
                     <input type="password" id="password" name="password" required minlength="8" autocomplete="new-password" placeholder="Choisissez un mot de passe (8+ caractères, majuscule, minuscule, chiffre)">

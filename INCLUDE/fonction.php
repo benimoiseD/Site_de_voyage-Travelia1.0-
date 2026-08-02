@@ -189,6 +189,25 @@ function get_user_email_by_id(mysqli $conn, int $userId): string
 }
 
 /**
+ * Récupère le pays de résidence d'un utilisateur via son ID.
+ */
+function get_user_country_by_id(mysqli $conn, int $userId): string
+{
+    $stmt = $conn->prepare('SELECT pays_residence FROM users WHERE Id = ?');
+    if (!$stmt) {
+        return '';
+    }
+
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $stmt->bind_result($country);
+    $stmt->fetch();
+    $stmt->close();
+
+    return is_string($country) ? trim($country) : '';
+}
+
+/**
  * Valide un mot de passe (minimum 8 caractères, 1 majuscule, 1 minuscule, 1 chiffre)
  */
 function validate_password(string $password): bool

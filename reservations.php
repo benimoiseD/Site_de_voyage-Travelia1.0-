@@ -112,7 +112,7 @@ $csrfToken = csrf_token();
                     
                     <div class="form-group">
                         <label for="type">Type de séjour *</label>
-                        <select id="type" name="type" required>
+                        <select id="type" name="type" class="travelia-select" required>
                             <option value="">Sélectionnez un type</option>
                             <option value="individuel">Voyage individuel</option>
                             <option value="couple">Voyage en couple</option>

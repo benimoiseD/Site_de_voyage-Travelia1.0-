@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $minutes = ceil($waitTime / 60);
             $error = "Trop de tentatives. Veuillez réessayer dans $minutes minute(s).";
         } else {
-            $stmt = $conn->prepare('SELECT Id, Nom_users, Email, MotDePasse, role, created_at FROM users WHERE Email = ?');
+            $stmt = $conn->prepare('SELECT Id, Nom_users, Email, MotDePasse, role, created_at, pays_residence FROM users WHERE Email = ?');
 
             if (!$stmt) {
                 $error = sql_error_message('préparer la requête de connexion');
@@ -55,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['Nom_users'] = $user['Nom_users'];
                         $_SESSION['email'] = $user['Email'];
                         $_SESSION['role'] = $role;
+                        $_SESSION['pays_residence'] = trim((string)($user['pays_residence'] ?? ''));
                         $_SESSION['created_at'] = $user['created_at'] ?? null;
 
                         $redirectPage = ($role === 'admin') ? 'ADMIN/dashboardAdmin.php' : 'acceuil.php';

@@ -360,6 +360,35 @@ body {
     border-color: #e97522;
 }
 
+.travelia-select {
+    min-height: 44px;
+    background-color: #fff;
+    color: #1a1a1a;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image:
+        linear-gradient(45deg, transparent 50%, #e97522 50%),
+        linear-gradient(135deg, #e97522 50%, transparent 50%),
+        linear-gradient(to right, transparent, transparent);
+    background-position:
+        calc(100% - 20px) calc(50% - 3px),
+        calc(100% - 14px) calc(50% - 3px),
+        calc(100% - 2.5rem) 50%;
+    background-size: 6px 6px, 6px 6px, 1px 1.7rem;
+    background-repeat: no-repeat;
+    padding-right: 44px;
+}
+
+.travelia-select:hover {
+    border-color: #d7b28b;
+}
+
+.travelia-select:focus {
+    border-color: #e97522;
+    box-shadow: 0 0 0 3px rgba(233, 117, 34, 0.12);
+}
+
 .btn-submit {
     width: 100%;
     background: linear-gradient(135deg, #e97522 0%, #d46a1f 100%);

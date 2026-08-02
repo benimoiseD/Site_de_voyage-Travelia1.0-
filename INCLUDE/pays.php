@@ -1,0 +1,251 @@
+<?php
+
+function travelia_country_list(): array
+{
+    return [
+        'Afghanistan',
+        'Afrique du Sud',
+        'Albanie',
+        'Algérie',
+        'Allemagne',
+        'Andorre',
+        'Angola',
+        'Antigua-et-Barbuda',
+        'Arabie saoudite',
+        'Argentine',
+        'Arménie',
+        'Australie',
+        'Autriche',
+        'Azerbaïdjan',
+        'Bahamas',
+        'Bahreïn',
+        'Bangladesh',
+        'Barbade',
+        'Belgique',
+        'Belize',
+        'Bénin',
+        'Bhoutan',
+        'Biélorussie',
+        'Bolivie',
+        'Bosnie-Herzégovine',
+        'Botswana',
+        'Brésil',
+        'Brunei',
+        'Bulgarie',
+        'Burkina Faso',
+        'Burundi',
+        'Cabo Verde',
+        'Cambodge',
+        'Cameroun',
+        'Canada',
+        'Chili',
+        'Chine',
+        'Chypre',
+        'Colombie',
+        'Comores',
+        'Congo',
+        'Corée du Nord',
+        'Corée du Sud',
+        'Costa Rica',
+        'Croatie',
+        'Cuba',
+        'Danemark',
+        'Djibouti',
+        'Dominique',
+        'Égypte',
+        'Émirats arabes unis',
+        'Équateur',
+        'Érythrée',
+        'Espagne',
+        'Estonie',
+        'Eswatini',
+        'États-Unis d’Amérique',
+        'Éthiopie',
+        'Fidji',
+        'Finlande',
+        'France',
+        'Gabon',
+        'Gambie',
+        'Géorgie',
+        'Ghana',
+        'Grèce',
+        'Grenade',
+        'Guatemala',
+        'Guinée',
+        'Guinée-Bissau',
+        'Guinée équatoriale',
+        'Guyana',
+        'Haïti',
+        'Honduras',
+        'Hongrie',
+        'Inde',
+        'Indonésie',
+        'Irak',
+        'Iran',
+        'Irlande',
+        'Islande',
+        'Israël',
+        'Italie',
+        'Jamaïque',
+        'Japon',
+        'Jordanie',
+        'Kazakhstan',
+        'Kenya',
+        'Kirghizistan',
+        'Kiribati',
+        'Koweït',
+        'Laos',
+        'Lesotho',
+        'Lettonie',
+        'Liban',
+        'Liberia',
+        'Libye',
+        'Liechtenstein',
+        'Lituanie',
+        'Luxembourg',
+        'Macédoine du Nord',
+        'Madagascar',
+        'Malaisie',
+        'Malawi',
+        'Maldives',
+        'Mali',
+        'Malte',
+        'Maroc',
+        'Marshall (Îles)',
+        'Maurice',
+        'Mauritanie',
+        'Mexique',
+        'Micronésie',
+        'Moldavie',
+        'Monaco',
+        'Mongolie',
+        'Monténégro',
+        'Mozambique',
+        'Myanmar',
+        'Namibie',
+        'Nauru',
+        'Népal',
+        'Nicaragua',
+        'Niger',
+        'Nigeria',
+        'Norvège',
+        'Nouvelle-Zélande',
+        'Oman',
+        'Ouganda',
+        'Ouzbékistan',
+        'Pakistan',
+        'Palaos',
+        'Panama',
+        'Papouasie-Nouvelle-Guinée',
+        'Paraguay',
+        'Pays-Bas',
+        'Pérou',
+        'Philippines',
+        'Pologne',
+        'Portugal',
+        'Qatar',
+        'République centrafricaine',
+        'République Démocratique du Congo',
+        'République du Congo',
+        'République dominicaine',
+        'Roumanie',
+        'Royaume-Uni',
+        'Russie',
+        'Rwanda',
+        'Sainte-Lucie',
+        'Saint-Kitts-et-Nevis',
+        'Saint-Marin',
+        'Saint-Vincent-et-les-Grenadines',
+        'Salvador',
+        'Samoa',
+        'Sao Tomé-et-Principe',
+        'Sénégal',
+        'Serbie',
+        'Seychelles',
+        'Sierra Leone',
+        'Singapour',
+        'Slovaquie',
+        'Slovénie',
+        'Somalie',
+        'Soudan',
+        'Soudan du Sud',
+        'Sri Lanka',
+        'Suède',
+        'Suisse',
+        'Suriname',
+        'Syrie',
+        'Tadjikistan',
+        'Tanzanie',
+        'Tchad',
+        'Tchéquie',
+        'Thaïlande',
+        'Timor-Leste',
+        'Togo',
+        'Tonga',
+        'Trinité-et-Tobago',
+        'Tunisie',
+        'Turkménistan',
+        'Turquie',
+        'Tuvalu',
+        'Ukraine',
+        'Uruguay',
+        'Vanuatu',
+        'Vatican',
+        'Venezuela',
+        'Viêt Nam',
+        'Yémen',
+        'Zambie',
+        'Zimbabwe',
+    ];
+}
+
+function travelia_is_valid_country(string $country): bool
+{
+    return in_array($country, travelia_country_list(), true);
+}
+
+function travelia_country_options_html(string $selectedCountry = ''): string
+{
+    $html = '<option value=""> Choisissez votre pays </option>';
+
+    foreach (travelia_country_list() as $country) {
+        $selected = ($country === $selectedCountry) ? ' selected' : '';
+        $html .= '<option value="' . htmlspecialchars($country, ENT_QUOTES) . '"' . $selected . '>' . htmlspecialchars($country) . '</option>';
+    }
+
+    return $html;
+}
+
+function travelia_country_aliases(string $country): array
+{
+    $aliases = [
+        'République Démocratique du Congo' => ['République Démocratique du Congo', 'RDC', 'DRC', 'Congo-Kinshasa'],
+        'République du Congo' => ['République du Congo', 'Congo', 'Congo-Brazzaville'],
+        'Ouganda' => ['Ouganda', 'Uganda'],
+        'Rwanda' => ['Rwanda'],
+        'Tanzanie' => ['Tanzanie', 'Tanzania'],
+        'Kenya' => ['Kenya'],
+        'France' => ['France'],
+        'Canada' => ['Canada'],
+        'États-Unis d’Amérique' => ['États-Unis d’Amérique', 'États-Unis', 'USA', 'United States'],
+    ];
+
+    if (isset($aliases[$country])) {
+        return $aliases[$country];
+    }
+
+    return [$country];
+}
+
+function travelia_country_matches(string $destinationCountry, string $userCountry): bool
+{
+    $destinationCountry = mb_strtolower(trim($destinationCountry));
+
+    foreach (travelia_country_aliases($userCountry) as $alias) {
+        if ($destinationCountry === mb_strtolower(trim($alias))) {
+            return true;
+        }
+    }
+
+    return false;
+}

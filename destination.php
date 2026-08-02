@@ -1,5 +1,8 @@
 <?php
+require_once __DIR__ . '/INCLUDE/fonction.php';
+require_once __DIR__ . '/INCLUDE/pays.php';
 require_once __DIR__ . '/INCLUDE/db.php';
+secure_session_start();
 
 $conn = get_db_connection();
 $pageTitle = "Travelia | Destinations";
@@ -18,6 +21,24 @@ if ($stmt) {
 }
 
 $searchTerm = trim((string)($_GET['search'] ?? ''));
+$viewMode = (($_GET['view'] ?? '') === 'all') ? 'all' : 'country';
+$userCountry = trim((string)($_SESSION['pays_residence'] ?? ''));
+
+if ($userCountry === '' && isset($_SESSION['Id'])) {
+    $userCountry = get_user_country_by_id($conn, (int)$_SESSION['Id']);
+    if ($userCountry !== '') {
+        $_SESSION['pays_residence'] = $userCountry;
+    }
+}
+
+$hasCountryFilter = isset($_SESSION['Id']) && $userCountry !== '' && $viewMode !== 'all';
+
+if ($hasCountryFilter) {
+    $destinations = array_values(array_filter($destinations, static function (array $destination) use ($userCountry): bool {
+        return travelia_country_matches((string)($destination['pays'] ?? ''), $userCountry);
+    }));
+}
+
 if ($searchTerm !== '') {
     $destinations = array_values(array_filter($destinations, static function (array $destination) use ($searchTerm): bool {
         $needle = mb_strtolower($searchTerm);
@@ -30,6 +51,15 @@ if ($searchTerm !== '') {
         return mb_strpos($haystack, $needle) !== false;
     }));
 }
+
+$queryParams = [];
+if ($searchTerm !== '') {
+    $queryParams['search'] = $searchTerm;
+}
+$countryViewUrl = 'destination.php' . ($queryParams ? '?' . http_build_query($queryParams) : '');
+$allViewParams = $queryParams;
+$allViewParams['view'] = 'all';
+$allViewUrl = 'destination.php?' . http_build_query($allViewParams);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -49,8 +79,18 @@ if ($searchTerm !== '') {
 
 <section class="destinations-hero">
     <div class="hero-content">
-        <h1>Explorez la RDC et ses Pays limitrophes avec Travelia</h1>
+        <h1>Explorez les destinations Travelia</h1>
         <p>Découvrez des destinations exceptionnelles et créez des souvenirs inoubliables.</p>
+        <?php if (isset($_SESSION['Id']) && $userCountry !== ''): ?>
+            <p class="country-recommendation">🌍 Destinations recommandées pour votre pays : <strong><?= htmlspecialchars($userCountry) ?></strong></p>
+            <div class="destinations-toolbar">
+                <?php if ($viewMode === 'all'): ?>
+                    <a href="<?= htmlspecialchars($countryViewUrl) ?>" class="btn-view-toggle">Retour aux destinations de mon pays</a>
+                <?php else: ?>
+                    <a href="<?= htmlspecialchars($allViewUrl) ?>" class="btn-view-toggle">Voir toutes les destinations</a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
         <?php if ($searchTerm !== ''): ?>
             <p class="search-summary">Résultats pour : <strong><?= htmlspecialchars($searchTerm) ?></strong></p>
         <?php endif; ?>
@@ -59,11 +99,19 @@ if ($searchTerm !== '') {
 
 <section class="destinations">
     <div class="container">
-        <h2 class="section-title">Nos destinations populaires</h2>
+        <h2 class="section-title"><?= $hasCountryFilter ? 'Destinations de votre pays' : 'Nos destinations populaires' ?></h2>
         <div class="destinations-grid">
             <?php if (empty($destinations)): ?>
                 <p class="no-destinations">
-                    <?= $searchTerm !== '' ? 'Aucune destination ne correspond à votre recherche.' : 'Aucune destination disponible pour le moment.' ?>
+                    <?php if ($searchTerm !== '' && $hasCountryFilter): ?>
+                        Aucune destination de votre pays ne correspond à votre recherche.
+                    <?php elseif ($searchTerm !== ''): ?>
+                        Aucune destination ne correspond à votre recherche.
+                    <?php elseif ($hasCountryFilter): ?>
+                        Aucune destination n’est encore disponible pour votre pays. Vous pouvez voir toutes les destinations.
+                    <?php else: ?>
+                        Aucune destination disponible pour le moment.
+                    <?php endif; ?>
                 </p>
             <?php else: ?>
                 <?php foreach ($destinations as $destination): ?>

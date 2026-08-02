@@ -24,7 +24,9 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neu
 .auth-form h3{margin:0 0 8px 0;font-size:1.1rem}
 .auth-form label{display:flex;flex-direction:column;font-size:0.9rem;color:var(--muted)}
 .auth-form input{padding:10px;border-radius:8px;border:1px solid #dde3ee;margin-top:6px}
+.auth-form select{padding:10px;border-radius:8px;border:1px solid #dde3ee;margin-top:6px;background:#fff}
 .auth-form input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(233,118,1,0.1)}
+.auth-form select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(233,118,1,0.1)}
 .auth-form input.field-error{border-color:#dc2626;box-shadow:0 0 0 3px rgba(220,38,38,0.1)}
 .auth-message{display:none;margin:0 0 14px 0;padding:11px 12px;border-radius:8px;font-size:0.92rem;line-height:1.45}
 .auth-message.error{display:block;background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
@@ -33,6 +35,43 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neu
 .signup-form{flex-direction:column;gap:8px;max-width:420px}
 .signup-form label{display:flex;flex-direction:column;font-size:0.9rem;color:var(--muted)}
 .signup-form input{padding:10px;border-radius:8px;border:1px solid #dde3ee;margin-top:6px}
+.signup-form select{padding:10px;border-radius:8px;border:1px solid #dde3ee;margin-top:6px;background:#fff}
+.auth-select{
+    width: 100%;
+    min-height: 44px;
+    padding: 12px 44px 12px 14px;
+    border: 1px solid #dde3ee;
+    border-radius: 10px;
+    background-color: #fff;
+    color: #0f172a;
+    font-size: 0.98rem;
+    line-height: 1.2;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image:
+        linear-gradient(45deg, transparent 50%, #e97601 50%),
+        linear-gradient(135deg, #e97601 50%, transparent 50%),
+        linear-gradient(to right, transparent, transparent);
+    background-position:
+        calc(100% - 20px) calc(50% - 3px),
+        calc(100% - 14px) calc(50% - 3px),
+        calc(100% - 2.5rem) 50%;
+    background-size: 6px 6px, 6px 6px, 1px 1.7rem;
+    background-repeat: no-repeat;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.auth-select:hover{
+    border-color: #cfd8e3;
+}
+.auth-select:focus{
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(233,118,1,0.1);
+}
+.auth-select option{
+    color: #0f172a;
+}
 .btn-primary{background:var(--accent);color:white;padding:10px 14px;border-radius:8px;border:0;cursor:pointer;transition:background 0.2s ease}
 .btn-primary:hover{background:#d65f00}
 .small{font-size:0.85rem;color:var(--muted);margin-top:8px}

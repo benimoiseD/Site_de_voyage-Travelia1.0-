@@ -56,9 +56,6 @@ $activePage = $activePage ?? $current_page;
                     <a href="<?= $siteBase ?>/index.php" class="nav-link<?= $activePage === 'index' ? ' active' : '' ?>">Accueil</a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= $siteBase ?>/destination.php" class="nav-link<?= $activePage === 'destination' ? ' active' : '' ?>">Destinations</a>
-                </li>
-                <li class="nav-item">
                     <a href="<?= $siteBase ?>/a pros pos.php" class="nav-link<?= $activePage === 'a pros pos' ? ' active' : '' ?>">À propos</a>
                 </li>
                 <li class="nav-item">
